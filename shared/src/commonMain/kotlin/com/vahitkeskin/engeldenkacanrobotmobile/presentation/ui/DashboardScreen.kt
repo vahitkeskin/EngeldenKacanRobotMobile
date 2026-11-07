@@ -6,12 +6,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -48,23 +50,155 @@ fun DashboardScreen(
     val logs by repository.logs.collectAsState()
     val isConnected by repository.isConnected.collectAsState()
 
-    Column(
+    // 1. TÜM EKRAN (Edge-to-Edge Arka Plan)
+    // Statusbar ve navigationbar saydam olsa bile arka plan rengi tüm ekrana taşar, siyah boşluk kalmaz.
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.bgPrimary)
-            .padding(14.dp)
     ) {
-        // ÜST ARAÇ ÇUBUĞU
-        Row(
+        // 2. İÇERİK ALANI (Tam Status Bar Altında ve Tam Navigation Bar Üstünde)
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(colors.bgSecondary)
-                .border(1.dp, colors.border, RoundedCornerShape(10.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .statusBarsPadding()      // Ekranın en üstü kesinlikle status barın altındadır
+                .navigationBarsPadding()  // Ekranın en altı kesinlikle navigation barın üstündedir
+                .imePadding()
+                .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
+            // BAŞLIK & DURUM ROZETİ KARTI
+            HeaderCard(
+                telemetryHasSignal = telemetry.hasSignal,
+                robotState = telemetry.state,
+                colors = colors
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // TEMA, DİL VE BAĞLANTI KONTROL BARI (Derli toplu tek panel)
+            ControlBar(
+                isConnected = isConnected,
+                themeMode = themeMode,
+                languageMode = languageMode,
+                colors = colors,
+                onThemeSelected = { themeMode = it },
+                onLanguageSelected = { languageMode = it },
+                onConnectToggle = {
+                    if (isConnected) repository.disconnect() else repository.connect("/dev/cu.usbserial-1240")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // GÖRSEL TELEMETRİ PANELLERİ (Radar ve Servo Göstergesi - Yan Yana)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(185.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                RadarView(
+                    telemetry = telemetry,
+                    colors = colors,
+                    modifier = Modifier.weight(1f).fillMaxHeight()
+                )
+                ServoGaugeView(
+                    telemetry = telemetry,
+                    colors = colors,
+                    modifier = Modifier.weight(1f).fillMaxHeight()
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // MESAFE METRİK KARTI
+            MetricCards(
+                telemetry = telemetry,
+                colors = colors
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // TELEMETRİ GÜNLÜĞÜ (Kompakt ve Şık Terminal)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = Strings.logTitle,
+                    color = colors.textMuted,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+                Text(
+                    text = if (telemetry.hasSignal) "● CANLI AKIŞ" else "○ BEKLEMEDE",
+                    color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(colors.logBg)
+                    .border(1.dp, colors.border, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                reverseLayout = true
+            ) {
+                if (logs.isEmpty()) {
+                    item {
+                        Text(
+                            text = if (telemetry.hasSignal) "> Telemetri akışı bekleniyor..." else "> ${Strings.noSignal}",
+                            color = colors.textMuted,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                } else {
+                    items(logs.reversed()) { logLine ->
+                        Text(
+                            text = logLine,
+                            color = colors.logText,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace,
+                            modifier = Modifier.padding(vertical = 1.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderCard(
+    telemetryHasSignal: Boolean,
+    robotState: RobotState,
+    colors: AppColors
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.bgSecondary)
+            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(if (telemetryHasSignal) Color(0xFF10B981) else Color(0xFFEF4444))
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
                     text = Strings.appTitle,
@@ -78,67 +212,84 @@ fun DashboardScreen(
                     fontSize = 10.sp
                 )
             }
-
-            val badgeText = if (!telemetry.hasSignal) {
-                Strings.noSignal.uppercase()
-            } else {
-                when (telemetry.state) {
-                    RobotState.CRUISING -> "SEYİR (CRUISE)"
-                    RobotState.AVOIDING -> "KAÇIŞ (AVOID)"
-                    RobotState.STOPPED -> "DURDU (STOP)"
-                    else -> Strings.noSignal.uppercase()
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(99.dp))
-                    .background(if (telemetry.hasSignal) telemetry.state.badgeColor else Color(0xFF6B7280))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = badgeText,
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        val badgeText = if (!telemetryHasSignal) {
+            Strings.noSignal.uppercase()
+        } else {
+            when (robotState) {
+                RobotState.CRUISING -> "SEYİR (CRUISE)"
+                RobotState.AVOIDING -> "KAÇIŞ (AVOID)"
+                RobotState.STOPPED -> "DURDURULDU"
+                else -> Strings.noSignal.uppercase()
+            }
+        }
+        val badgeColor = if (telemetryHasSignal) robotState.badgeColor else Color(0xFF6B7280)
 
-        // TEMA VE DİL SEÇİCİ BARI
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(badgeColor)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = badgeText,
+                color = Color.White,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun ControlBar(
+    isConnected: Boolean,
+    themeMode: ThemeMode,
+    languageMode: LanguageMode,
+    colors: AppColors,
+    onThemeSelected: (ThemeMode) -> Unit,
+    onLanguageSelected: (LanguageMode) -> Unit,
+    onConnectToggle: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(colors.bgSecondary)
+            .border(1.dp, colors.border, RoundedCornerShape(10.dp))
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        // Üst Satır: Tema ve Dil Seçicileri
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Tema Seçici
+            // Tema Segmenti
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = Strings.themeLabel, color = colors.textMuted, fontSize = 10.sp, modifier = Modifier.padding(end = 4.dp))
-                ThemeOptionButton("Sys", themeMode == ThemeMode.SYSTEM, colors) { themeMode = ThemeMode.SYSTEM }
-                ThemeOptionButton("Dark", themeMode == ThemeMode.DARK, colors) { themeMode = ThemeMode.DARK }
-                ThemeOptionButton("Light", themeMode == ThemeMode.LIGHT, colors) { themeMode = ThemeMode.LIGHT }
+                SegmentedPill("Sys", themeMode == ThemeMode.SYSTEM, colors) { onThemeSelected(ThemeMode.SYSTEM) }
+                SegmentedPill("Dark", themeMode == ThemeMode.DARK, colors) { onThemeSelected(ThemeMode.DARK) }
+                SegmentedPill("Light", themeMode == ThemeMode.LIGHT, colors) { onThemeSelected(ThemeMode.LIGHT) }
             }
 
-            // Dil Seçici
+            // Dil Segmenti
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = Strings.langLabel, color = colors.textMuted, fontSize = 10.sp, modifier = Modifier.padding(end = 4.dp))
-                ThemeOptionButton("Sys", languageMode == LanguageMode.SYSTEM, colors) { languageMode = LanguageMode.SYSTEM }
-                ThemeOptionButton("TR", languageMode == LanguageMode.TR, colors) { languageMode = LanguageMode.TR }
-                ThemeOptionButton("EN", languageMode == LanguageMode.EN, colors) { languageMode = LanguageMode.EN }
+                SegmentedPill("Sys", languageMode == LanguageMode.SYSTEM, colors) { onLanguageSelected(LanguageMode.SYSTEM) }
+                SegmentedPill("TR", languageMode == LanguageMode.TR, colors) { onLanguageSelected(LanguageMode.TR) }
+                SegmentedPill("EN", languageMode == LanguageMode.EN, colors) { onLanguageSelected(LanguageMode.EN) }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // BAĞLANTI BUTONU
+        // Alt Satır: Bağlantı Butonu
         Button(
-            onClick = {
-                if (isConnected) repository.disconnect() else repository.connect("/dev/cu.usbserial-1240")
-            },
-            modifier = Modifier.fillMaxWidth().height(36.dp),
-            shape = RoundedCornerShape(8.dp),
+            onClick = onConnectToggle,
+            modifier = Modifier.fillMaxWidth().height(32.dp),
+            contentPadding = PaddingValues(vertical = 0.dp),
+            shape = RoundedCornerShape(6.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isConnected) Color(0xFFDC2626) else Color(0xFF2563EB)
             )
@@ -149,70 +300,11 @@ fun DashboardScreen(
                 fontWeight = FontWeight.SemiBold
             )
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // GÖRSEL PANELLER (Radar ve Servo Göstergesi)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            RadarView(
-                telemetry = telemetry,
-                colors = colors,
-                modifier = Modifier.weight(1f)
-            )
-            ServoGaugeView(
-                telemetry = telemetry,
-                colors = colors,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // MESAFE METRİK KARTI
-        MetricCards(
-            telemetry = telemetry,
-            colors = colors
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // CANLI TELEMETRİ LOGLARI
-        Text(
-            text = Strings.logTitle,
-            color = colors.textMuted,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .clip(RoundedCornerShape(8.dp))
-                .background(colors.logBg)
-                .border(1.dp, colors.border, RoundedCornerShape(8.dp))
-                .padding(8.dp),
-            reverseLayout = true
-        ) {
-            items(logs.reversed()) { logLine ->
-                Text(
-                    text = logLine,
-                    color = colors.logText,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(vertical = 1.dp)
-                )
-            }
-        }
     }
 }
 
 @Composable
-private fun ThemeOptionButton(
+private fun SegmentedPill(
     label: String,
     isSelected: Boolean,
     colors: AppColors,
@@ -220,11 +312,11 @@ private fun ThemeOptionButton(
 ) {
     Button(
         onClick = onClick,
-        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
-        modifier = Modifier.height(26.dp).padding(horizontal = 2.dp),
+        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+        modifier = Modifier.height(24.dp).padding(horizontal = 1.5.dp),
         shape = RoundedCornerShape(4.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color(0xFF2563EB) else colors.bgSecondary,
+            containerColor = if (isSelected) Color(0xFF2563EB) else colors.bgPrimary,
             contentColor = if (isSelected) Color.White else colors.textMuted
         )
     ) {
