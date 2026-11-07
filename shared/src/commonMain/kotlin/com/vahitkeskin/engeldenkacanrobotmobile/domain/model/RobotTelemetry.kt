@@ -12,3 +12,4 @@ data class RobotTelemetry(
     val isWarning: Boolean get() = frontDistance in 16..30
     val isSafe: Boolean get() = frontDistance > 30
 }
+

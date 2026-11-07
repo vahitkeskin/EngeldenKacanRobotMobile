@@ -11,3 +11,4 @@ interface ITelemetryRepository {
     fun connect(target: String)
     fun disconnect()
 }
+
