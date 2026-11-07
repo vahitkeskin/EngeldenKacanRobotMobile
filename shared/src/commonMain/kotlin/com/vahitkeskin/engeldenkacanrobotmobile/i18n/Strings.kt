@@ -32,9 +32,29 @@ object Strings {
     val leftCorridor: (Int) -> String get() = { d -> if (isTurkish()) "Sol Koridor: ${if (d > 0) "$d cm" else "--"}" else "Left Corridor: ${if (d > 0) "$d cm" else "--"}" }
     val rightCorridor: (Int) -> String get() = { d -> if (isTurkish()) "Sağ Koridor: ${if (d > 0) "$d cm" else "--"}" else "Right Corridor: ${if (d > 0) "$d cm" else "--"}" }
     val logTitle: String get() = if (isTurkish()) "I2C & TELEMETRİ GÜNLÜĞÜ" else "I2C & TELEMETRY LOG"
-    val themeLabel: String get() = if (isTurkish()) "Tema:" else "Theme:"
-    val langLabel: String get() = if (isTurkish()) "Dil:" else "Lang:"
+    val themeLabel: String get() = if (isTurkish()) "Tema" else "Theme"
+    val langLabel: String get() = if (isTurkish()) "Dil" else "Language"
     val optSystem: String get() = if (isTurkish()) "Sistem" else "System"
     val optDark: String get() = if (isTurkish()) "Koyu" else "Dark"
     val optLight: String get() = if (isTurkish()) "Açık" else "Light"
+    val optLangAuto: String get() = if (isTurkish()) "Sistem" else "System"
+    val optLangTr: String get() = "Türkçe"
+    val optLangEn: String get() = "English"
+
+    // Bottom Navigation Bar & Robot İkiz Ekranı
+    val navTelemetry: String get() = if (isTurkish()) "Telemetri" else "Telemetry"
+    val navRobotTwin: String get() = if (isTurkish()) "Robot 3D" else "Robot 3D"
+    val robotTwinTitle: String get() = if (isTurkish()) "ROBOT 3D DİJİTAL İKİZ" else "ROBOT 3D DIGITAL TWIN"
+    val leftWheel: String get() = if (isTurkish()) "Sol Teker" else "Left Wheel"
+    val rightWheel: String get() = if (isTurkish()) "Sağ Teker" else "Right Wheel"
+    val servoMotor: String get() = if (isTurkish()) "SG90 Servo Motor" else "SG90 Servo Motor"
+    val ultrasonicSensor: String get() = if (isTurkish()) "HC-SR04 Sensör" else "HC-SR04 Sensor"
+    val wheelFwd: String get() = if (isTurkish()) "▲ İLERİ" else "▲ FORWARD"
+    val wheelRev: String get() = if (isTurkish()) "▼ GERİ" else "▼ BACKWARD"
+    val wheelStop: String get() = if (isTurkish()) "■ DURUYOR" else "■ STOPPED"
+    val batteryPack: String get() = if (isTurkish()) "2x 18650 Batarya" else "2x 18650 Battery"
+    val casterWheel: String get() = if (isTurkish()) "Sarhoş Tekerlek" else "Caster Wheel"
+    val motorDriverL298N: String get() = if (isTurkish()) "L298N Sürücü" else "L298N Driver"
+    val arduinoShield: String get() = if (isTurkish()) "Arduino Uno" else "Arduino Uno"
+    val liveBeam: String get() = if (isTurkish()) "Aktif Radar Işını" else "Active Sonar Beam"
 }
