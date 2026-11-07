@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.SetSystemBarsTheme
 import com.vahitkeskin.engeldenkacanrobotmobile.data.MockTelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotState
+import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.repository.ITelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
@@ -47,10 +48,8 @@ fun DashboardScreen(
     }
     val colors = if (isDark) AppColors.Dark else AppColors.Light
 
-    // Telefonun sistem status barı (saat, wifi, şarj ikonu) ve navigation bar ikonlarını anlık değiştir
+    // Telefonun sistem status barı ve navigation bar ikonlarını anlık değiştir
     SetSystemBarsTheme(isDark = isDark)
-
-    // Dil modunun anlık atanması
     Strings.currentLanguage = languageMode
 
     val telemetry by repository.telemetry.collectAsState()
@@ -60,7 +59,6 @@ fun DashboardScreen(
     val scrollState = rememberScrollState()
 
     // 1. TÜM EKRAN (Edge-to-Edge Arka Plan)
-    // Saydam status bar ve navigation bar altını temanın rengiyle doldurur.
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -70,20 +68,18 @@ fun DashboardScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()      // Ekranın en üstü kesinlikle status barın altındadır
-                .padding(bottom = 80.dp)  // Bottom Navigation View için güvenli alan
+                .statusBarsPadding()
+                .padding(bottom = 80.dp)  // BNV için güvenli alan
                 .imePadding()
-                .verticalScroll(scrollState) // EKRAN KESİNTİSİZ SCROLL EDİLEBİLİR
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // BAŞLIK & DURUM ROZETİ KARTI
+            // BAŞLIK & DURUM ROZETİ KARTI (BATARYA ROZETİ ENTEGRELİ)
             HeaderCard(
-                telemetryHasSignal = telemetry.hasSignal,
-                robotState = telemetry.state,
+                telemetry = telemetry,
                 colors = colors
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // TEMA, DİL VE BAĞLANTI KONTROL BARI
             ControlBar(
@@ -98,7 +94,12 @@ fun DashboardScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            // BATARYA & GÜÇ YÖNETİM KARTI (2S Li-Ion: 7.4V / 8.4V)
+            BatteryStatusCard(
+                telemetry = telemetry,
+                colors = colors,
+                onToggleCharging = { repository.toggleChargingSimulation() }
+            )
 
             // GÖRSEL TELEMETRİ PANELLERİ (Radar ve Servo Göstergesi - Yan Yana)
             Row(
@@ -119,15 +120,11 @@ fun DashboardScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
             // MESAFE METRİK KARTI
             MetricCards(
                 telemetry = telemetry,
                 colors = colors
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
 
             // TELEMETRİ GÜNLÜĞÜ (Kompakt ve Scroll Edilebilir Terminal)
             Row(
@@ -194,10 +191,22 @@ fun DashboardScreen(
 
 @Composable
 private fun HeaderCard(
-    telemetryHasSignal: Boolean,
-    robotState: RobotState,
+    telemetry: RobotTelemetry,
     colors: AppColors
 ) {
+    val telemetryHasSignal = telemetry.hasSignal
+    val robotState = telemetry.state
+    val batPct = telemetry.batteryPercentage
+    val isChg = telemetry.isCharging
+    val batVolt = telemetry.batteryVoltage
+
+    val batColor = when {
+        isChg -> Color(0xFF10B981)
+        batPct <= 15 -> Color(0xFFEF4444)
+        batPct <= 35 -> Color(0xFFF59E0B)
+        else -> Color(0xFF10B981)
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,30 +240,53 @@ private fun HeaderCard(
             }
         }
 
-        val badgeText = if (!telemetryHasSignal) {
-            Strings.noSignal.uppercase()
-        } else {
-            when (robotState) {
-                RobotState.CRUISING -> "SEYİR (CRUISE)"
-                RobotState.AVOIDING -> "KAÇIŞ (AVOID)"
-                RobotState.STOPPED -> "DURDURULDU"
-                else -> Strings.noSignal.uppercase()
-            }
-        }
-        val badgeColor = if (telemetryHasSignal) robotState.badgeColor else Color(0xFF6B7280)
-
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(badgeColor)
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(
-                text = badgeText,
-                color = Color.White,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // BATARYA ROZETİ (Header Üzerinde)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(batColor.copy(alpha = 0.15f))
+                    .border(0.8.dp, batColor, RoundedCornerShape(6.dp))
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "${if (isChg) "⚡ " else "🔋 "}%$batPct",
+                    color = batColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // ROBOT DURUM ROZETİ
+            val badgeText = if (!telemetryHasSignal) {
+                Strings.noSignal.uppercase()
+            } else {
+                when (robotState) {
+                    RobotState.CRUISING -> "SEYİR"
+                    RobotState.AVOIDING -> "KAÇIŞ"
+                    RobotState.MANUAL_OVERRIDE -> "MANUEL"
+                    RobotState.STOPPED -> "DURDURULDU"
+                    else -> Strings.noSignal.uppercase()
+                }
+            }
+            val badgeColor = if (telemetryHasSignal) robotState.badgeColor else Color(0xFF6B7280)
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(badgeColor)
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -278,7 +310,7 @@ private fun ControlBar(
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // 1. TEMA SEÇİCİ (Segmented Row)
+        // 1. TEMA SEÇİCİ
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -328,7 +360,7 @@ private fun ControlBar(
             }
         }
 
-        // 2. DİL SEÇİCİ (Segmented Row)
+        // 2. DİL SEÇİCİ
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

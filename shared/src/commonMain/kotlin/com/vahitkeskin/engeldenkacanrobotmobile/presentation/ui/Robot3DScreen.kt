@@ -365,30 +365,60 @@ private fun FloatingHeader(
             }
         }
 
-        val badgeText = if (!telemetry.hasSignal) {
-            Strings.noSignal.uppercase()
-        } else {
-            when (telemetry.state) {
-                RobotState.CRUISING -> "SEYİR (CRUISE)"
-                RobotState.AVOIDING -> "KAÇIŞ (AVOID)"
-                RobotState.STOPPED -> "DURDURULDU"
-                else -> Strings.noSignal.uppercase()
-            }
-        }
-        val badgeColor = if (telemetry.hasSignal) telemetry.state.badgeColor else Color(0xFF6B7280)
-
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
-                .background(badgeColor)
-                .padding(horizontal = 7.dp, vertical = 3.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text(
-                text = badgeText,
-                color = Color.White,
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // BATARYA ROZETİ (2S Li-Ion: 7.84V, %85, ⚡ Şarj)
+            val batPct = telemetry.batteryPercentage
+            val isChg = telemetry.isCharging
+            val batColor = when {
+                isChg -> Color(0xFF10B981)
+                batPct <= 15 -> Color(0xFFEF4444)
+                batPct <= 35 -> Color(0xFFF59E0B)
+                else -> Color(0xFF10B981)
+            }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(batColor.copy(alpha = 0.2f))
+                    .border(1.dp, batColor, RoundedCornerShape(5.dp))
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "${if (isChg) "⚡ " else "🔋 "}%$batPct",
+                    color = batColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            val badgeText = if (!telemetry.hasSignal) {
+                Strings.noSignal.uppercase()
+            } else {
+                when (telemetry.state) {
+                    RobotState.CRUISING -> "SEYİR (CRUISE)"
+                    RobotState.AVOIDING -> "KAÇIŞ (AVOID)"
+                    RobotState.MANUAL_OVERRIDE -> "MANUEL"
+                    RobotState.STOPPED -> "DURDURULDU"
+                    else -> Strings.noSignal.uppercase()
+                }
+            }
+            val badgeColor = if (telemetry.hasSignal) telemetry.state.badgeColor else Color(0xFF6B7280)
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(badgeColor)
+                    .padding(horizontal = 7.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    color = Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

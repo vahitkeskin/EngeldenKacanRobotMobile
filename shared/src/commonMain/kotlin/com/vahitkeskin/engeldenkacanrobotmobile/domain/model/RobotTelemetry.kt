@@ -18,14 +18,37 @@ data class RobotTelemetry(
     val leftDistance: Int = -1,
     val rightDistance: Int = -1,
     val hasSignal: Boolean = false,
-    val timestamp: Long = 0L
+    val timestamp: Long = 0L,
+    // Batarya & Şarj Telemetrisi (2S 18650 Li-Ion: 6.4V - 8.4V)
+    val batteryVoltage: Float = 7.84f,
+    val batteryPercentage: Int = 85,
+    val isCharging: Boolean = false,
+    // Manuel Müdahale & Kumanda Durumu
+    val isManualMode: Boolean = false,
+    val manualDriveCommand: String = "STOP", // FORWARD, BACKWARD, LEFT, RIGHT, STOP
+    val targetPwmSpeed: Int = 180
 ) {
     val isDanger: Boolean get() = hasSignal && frontDistance in 1..15
     val isWarning: Boolean get() = hasSignal && frontDistance in 16..30
     val isSafe: Boolean get() = hasSignal && frontDistance > 30
 
+    val isBatteryLow: Boolean get() = batteryPercentage <= 20
+    val isBatteryCritical: Boolean get() = batteryPercentage <= 10
+
     val leftWheelState: WheelState get() {
         if (!hasSignal) return WheelState(0, WheelDirection.STOPPED)
+        
+        // Manuel mod aktifse doğrudan kullanıcının kumanda komutunu uygula
+        if (state == RobotState.MANUAL_OVERRIDE || isManualMode) {
+            return when (manualDriveCommand.uppercase()) {
+                "FORWARD", "FWD" -> WheelState(targetPwmSpeed, WheelDirection.FORWARD)
+                "BACKWARD", "REV" -> WheelState(targetPwmSpeed, WheelDirection.BACKWARD)
+                "LEFT" -> WheelState(targetPwmSpeed, WheelDirection.BACKWARD)
+                "RIGHT" -> WheelState(targetPwmSpeed, WheelDirection.FORWARD)
+                else -> WheelState(0, WheelDirection.STOPPED)
+            }
+        }
+
         return when (state) {
             RobotState.CRUISING -> WheelState(180, WheelDirection.FORWARD)
             RobotState.AVOIDING -> {
@@ -38,12 +61,25 @@ data class RobotTelemetry(
                     WheelState(0, WheelDirection.STOPPED)
                 }
             }
+            RobotState.MANUAL_OVERRIDE -> WheelState(0, WheelDirection.STOPPED)
             RobotState.STOPPED, RobotState.DISCONNECTED -> WheelState(0, WheelDirection.STOPPED)
         }
     }
 
     val rightWheelState: WheelState get() {
         if (!hasSignal) return WheelState(0, WheelDirection.STOPPED)
+
+        // Manuel mod aktifse doğrudan kullanıcının kumanda komutunu uygula
+        if (state == RobotState.MANUAL_OVERRIDE || isManualMode) {
+            return when (manualDriveCommand.uppercase()) {
+                "FORWARD", "FWD" -> WheelState(targetPwmSpeed, WheelDirection.FORWARD)
+                "BACKWARD", "REV" -> WheelState(targetPwmSpeed, WheelDirection.BACKWARD)
+                "LEFT" -> WheelState(targetPwmSpeed, WheelDirection.FORWARD)
+                "RIGHT" -> WheelState(targetPwmSpeed, WheelDirection.BACKWARD)
+                else -> WheelState(0, WheelDirection.STOPPED)
+            }
+        }
+
         return when (state) {
             RobotState.CRUISING -> WheelState(180, WheelDirection.FORWARD)
             RobotState.AVOIDING -> {
@@ -56,11 +92,12 @@ data class RobotTelemetry(
                     WheelState(0, WheelDirection.STOPPED)
                 }
             }
+            RobotState.MANUAL_OVERRIDE -> WheelState(0, WheelDirection.STOPPED)
             RobotState.STOPPED, RobotState.DISCONNECTED -> WheelState(0, WheelDirection.STOPPED)
         }
     }
 
     companion object {
-        fun noSignal(): RobotTelemetry = RobotTelemetry()
+        fun noSignal(): RobotTelemetry = RobotTelemetry(hasSignal = false)
     }
 }

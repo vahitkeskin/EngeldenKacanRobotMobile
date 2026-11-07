@@ -10,5 +10,15 @@ interface ITelemetryRepository {
 
     fun connect(target: String)
     fun disconnect()
-}
 
+    // 🎮 Robota Doğrudan Müdahale Metotları (Direct Hardware Override)
+    fun sendDriveCommand(command: String, pwmSpeed: Int = 180)
+    fun setServoAngle(angle: Int)
+    fun emergencyStop()
+    fun startAutonomous()
+    fun setManualMode(enabled: Boolean)
+    fun triggerHorn()
+
+    // ⚡ Batarya & Şarj Simülasyonu / Durum Yönetimi
+    fun toggleChargingSimulation()
+}

@@ -23,6 +23,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.DashboardScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.Robot3DScreen
+import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.RobotControllerScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import kotlinx.coroutines.launch
@@ -30,11 +31,12 @@ import kotlinx.coroutines.launch
 /**
  * 📱 App - Root Multiplatform Compose Container
  * Tüm platformlarda (Android, iOS, Desktop) tam ekran kenardan kenara (edge-to-edge) çalışan,
- * ekranlar arası yatay kaydırma (HorizontalPager swipe) ve senkronize 2 sekmeli
+ * ekranlar arası yatay kaydırma (HorizontalPager swipe) ve senkronize 3 sekmeli
  * Bottom Navigation View (BNV) sunan ana kapsayıcı.
  *
- * Tab 0: 📊 Telemetri (DashboardScreen) - Radar, Servo Gauge, HC-SR04 Metrikler ve Günlük
- * Tab 1: 🤖 Robot 3D (Robot3DScreen)   - Tam ekranı kaplayan, iki parmakla zoom/çevirme/gezinme destekli 3D Dijital İkiz
+ * Tab 0: 📊 Telemetri (DashboardScreen)      - Radar, HC-SR04, Batarya Yönetimi ve Anasayfa Hızlı Müdahale
+ * Tab 1: 🎮 Kumanda (RobotControllerScreen)  - Tam Sanal Kokpit, D-Pad Direksiyon, Servo Kadranı, Vitesler
+ * Tab 2: 🤖 Robot 3D (Robot3DScreen)        - Tam ekranı kaplayan, iki parmakla zoom/çevirme destekli 3D Dijital İkiz
  */
 @Composable
 fun App() {
@@ -54,8 +56,8 @@ fun App() {
     SetSystemBarsTheme(isDark = isDark)
     Strings.currentLanguage = languageMode
 
-    // EKRANLAR ARASI KAYDIRMA (HorizontalPager Swipe) - Sayfa 0: Telemetri, Sayfa 1: Robot 3D
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
+    // EKRANLAR ARASI KAYDIRMA (HorizontalPager Swipe) - 3 SEKMELİ YAPI
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     // 3D Etkileşim Kilidi: 3D aktifken HorizontalPager kaydırma KESİNLİKLE engellenir
     var is3dActive by remember { mutableStateOf(false) }
@@ -67,11 +69,11 @@ fun App() {
                 .background(colors.bgPrimary)
         ) {
             // 1. KAYDIRILABİLİR EKRAN SAYFALARI (Swipe / Gestures)
-            // 3D aktifken ekran kaydırma kesinlikle bloke edilir; sadece Telemetri butonuyla geri dönülebilir!
+            // 3D aktifken ekran kaydırma kesinlikle bloke edilir; sadece butonla geri dönülebilir!
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = if (pagerState.currentPage == 1) !is3dActive else true
+                userScrollEnabled = if (pagerState.currentPage == 2) !is3dActive else true
             ) { page ->
                 when (page) {
                     0 -> DashboardScreen(
@@ -81,7 +83,15 @@ fun App() {
                         onThemeSelected = { themeMode = it },
                         onLanguageSelected = { languageMode = it }
                     )
-                    1 -> Robot3DScreen(
+                    1 -> RobotControllerScreen(
+                        repository = repository,
+                        themeMode = themeMode,
+                        languageMode = languageMode,
+                        onNavigateTo3D = {
+                            coroutineScope.launch { pagerState.animateScrollToPage(2) }
+                        }
+                    )
+                    2 -> Robot3DScreen(
                         repository = repository,
                         is3dActive = is3dActive,
                         onToggle3dActive = { is3dActive = !is3dActive },
@@ -102,7 +112,7 @@ fun App() {
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .navigationBarsPadding() // Sistemin alt gezinme çubuğunun kesinlikle üstünde durur
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 BottomNavigationBar(
                     selectedTab = pagerState.currentPage,
@@ -132,7 +142,7 @@ private fun BottomNavigationBar(
             .background(colors.bgSecondary.copy(alpha = 0.96f))
             .border(1.2.dp, colors.border, RoundedCornerShape(26.dp))
             .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // TAB 1: TELEMETRİ
@@ -145,14 +155,24 @@ private fun BottomNavigationBar(
             onClick = { onTabSelected(0) }
         )
 
-        // TAB 2: ROBOT 3D DİJİTAL İKİZ
+        // TAB 2: KUMANDA (KOKPİT)
         BottomNavItem(
-            icon = "🤖",
-            label = Strings.navRobotTwin,
+            icon = "🎮",
+            label = Strings.navController,
             isSelected = selectedTab == 1,
             colors = colors,
             modifier = Modifier.weight(1f),
             onClick = { onTabSelected(1) }
+        )
+
+        // TAB 3: ROBOT 3D DİJİTAL İKİZ
+        BottomNavItem(
+            icon = "🤖",
+            label = Strings.navRobotTwin,
+            isSelected = selectedTab == 2,
+            colors = colors,
+            modifier = Modifier.weight(1f),
+            onClick = { onTabSelected(2) }
         )
     }
 }
@@ -180,12 +200,12 @@ private fun BottomNavItem(
         ) {
             Text(
                 text = icon,
-                fontSize = 15.sp,
-                modifier = Modifier.padding(end = 6.dp)
+                fontSize = 14.sp,
+                modifier = Modifier.padding(end = 4.dp)
             )
             Text(
                 text = label,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                 color = if (isSelected) Color.White else colors.textMuted
             )
