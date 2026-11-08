@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
@@ -43,91 +45,123 @@ fun RadarView(
             color = colors.textPrimary,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 6.dp)
+            minLines = 2,
+            maxLines = 2,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp)
         )
 
-        Canvas(modifier = Modifier.fillMaxWidth().height(150.dp)) {
-            val cx = size.width / 2
-            val cy = size.height - 15f
-            val maxRadius = min(cx - 20f, cy - 15f)
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val cx = size.width / 2
+                val cy = size.height - 10f
+                val maxRadius = min(cx - 16f, cy - 8f)
 
-            // Konsantrik Mesafe Yayları (10, 20, 30, 40, 50 cm)
-            val rings = 5
-            for (i in 1..rings) {
-                val r = (maxRadius * i) / rings
-                drawArc(
-                    color = colors.radarGrid,
-                    startAngle = 180f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = Offset(cx - r, cy - r),
-                    size = Size(r * 2, r * 2),
-                    style = Stroke(width = 1.2f)
-                )
-            }
-
-            // Açı Çizgileri
-            for (a in 0..180 step 30) {
-                val rad = a * (PI / 180.0)
-                val ex = cx + (maxRadius * cos(rad)).toFloat()
-                val ey = cy - (maxRadius * sin(rad)).toFloat()
-                drawLine(
-                    color = colors.radarGrid,
-                    start = Offset(cx, cy),
-                    end = Offset(ex, ey),
-                    strokeWidth = 1f
-                )
-            }
-
-            if (telemetry.hasSignal) {
-                // Gerçek Servo Işını
-                val beamRad = telemetry.servoAngle * (PI / 180.0)
-                val bx = cx + (maxRadius * cos(beamRad)).toFloat()
-                val by = cy - (maxRadius * sin(beamRad)).toFloat()
-
-                drawLine(
-                    color = Color(0x3310B981),
-                    start = Offset(cx, cy),
-                    end = Offset(bx, by),
-                    strokeWidth = 8f,
-                    cap = StrokeCap.Round
-                )
-                drawLine(
-                    color = Color(0xFF34D399),
-                    start = Offset(cx, cy),
-                    end = Offset(bx, by),
-                    strokeWidth = 2.5f,
-                    cap = StrokeCap.Round
-                )
-
-                // Gerçek Engel Noktası
-                if (telemetry.frontDistance in 3..50) {
-                    val rNorm = (telemetry.frontDistance / 50.0f) * maxRadius
-                    val obsX = cx + (rNorm * cos(beamRad)).toFloat()
-                    val obsY = cy - (rNorm * sin(beamRad)).toFloat()
-
-                    drawCircle(color = Color(0xFFEF4444), radius = 5f, center = Offset(obsX, obsY))
-                    drawCircle(color = Color(0xFFFECACA), radius = 2.5f, center = Offset(obsX, obsY))
+                // Konsantrik Mesafe Yayları (10, 20, 30, 40, 50 cm)
+                val rings = 5
+                for (i in 1..rings) {
+                    val r = (maxRadius * i) / rings
+                    drawArc(
+                        color = colors.radarGrid,
+                        startAngle = 180f,
+                        sweepAngle = 180f,
+                        useCenter = false,
+                        topLeft = Offset(cx - r, cy - r),
+                        size = Size(r * 2, r * 2),
+                        style = Stroke(width = 1.2f)
+                    )
                 }
+
+                // Açı Çizgileri
+                for (a in 0..180 step 30) {
+                    val rad = a * (PI / 180.0)
+                    val ex = cx + (maxRadius * cos(rad)).toFloat()
+                    val ey = cy - (maxRadius * sin(rad)).toFloat()
+                    drawLine(
+                        color = colors.radarGrid,
+                        start = Offset(cx, cy),
+                        end = Offset(ex, ey),
+                        strokeWidth = 1f
+                    )
+                }
+
+                if (telemetry.hasSignal) {
+                    // Gerçek Servo Işını
+                    val beamRad = telemetry.servoAngle * (PI / 180.0)
+                    val bx = cx + (maxRadius * cos(beamRad)).toFloat()
+                    val by = cy - (maxRadius * sin(beamRad)).toFloat()
+
+                    drawLine(
+                        color = Color(0x3310B981),
+                        start = Offset(cx, cy),
+                        end = Offset(bx, by),
+                        strokeWidth = 8f,
+                        cap = StrokeCap.Round
+                    )
+                    drawLine(
+                        color = Color(0xFF34D399),
+                        start = Offset(cx, cy),
+                        end = Offset(bx, by),
+                        strokeWidth = 2.5f,
+                        cap = StrokeCap.Round
+                    )
+
+                    // Gerçek Engel Noktası
+                    if (telemetry.frontDistance in 3..50) {
+                        val rNorm = (telemetry.frontDistance / 50.0f) * maxRadius
+                        val obsX = cx + (rNorm * cos(beamRad)).toFloat()
+                        val obsY = cy - (rNorm * sin(beamRad)).toFloat()
+
+                        drawCircle(color = Color(0xFFEF4444), radius = 5f, center = Offset(obsX, obsY))
+                        drawCircle(color = Color(0xFFFECACA), radius = 2.5f, center = Offset(obsX, obsY))
+                    }
+                }
+
+                // Merkez Noktası
+                drawCircle(
+                    color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
+                    radius = 6f,
+                    center = Offset(cx, cy)
+                )
+                drawCircle(color = Color.White, radius = 2.5f, center = Offset(cx, cy))
             }
 
-            // Merkez Noktası
-            drawCircle(
-                color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
-                radius = 6f,
-                center = Offset(cx, cy)
-            )
-            drawCircle(color = Color.White, radius = 2.5f, center = Offset(cx, cy))
+            if (!telemetry.hasSignal) {
+                Text(
+                    text = "[${Strings.noSignal.uppercase()}]",
+                    color = Color(0xFFEF4444),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(bottom = 2.dp)
+                )
+            }
         }
+    }
+}
 
-        if (!telemetry.hasSignal) {
-            Text(
-                text = "[${Strings.noSignal.uppercase()}]",
-                color = Color(0xFFEF4444),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-        }
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun RadarViewPreview() {
+    val sample = RobotTelemetry(
+        frontDistance = 28,
+        servoAngle = 75,
+        hasSignal = true
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppColors.Dark.bgPrimary)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .padding(bottom = 80.dp) // BNV üstünde kalacak şekilde güvenli boşluk
+    ) {
+        RadarView(
+            telemetry = sample,
+            colors = AppColors.Dark,
+            modifier = Modifier.fillMaxWidth().height(185.dp)
+        )
     }
 }

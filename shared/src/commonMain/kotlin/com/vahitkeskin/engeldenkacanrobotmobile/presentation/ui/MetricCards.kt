@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MetricCards(
@@ -119,5 +120,31 @@ fun MetricCards(
                 fontSize = 11.sp
             )
         }
+    }
+}
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun MetricCardsPreview() {
+    val sample = RobotTelemetry(
+        frontDistance = 45,
+        leftDistance = 62,
+        rightDistance = 38,
+        hasSignal = true
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppColors.Dark.bgPrimary)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .padding(bottom = 80.dp) // BNV üstünde kalacak şekilde güvenli boşluk
+    ) {
+        MetricCards(
+            telemetry = sample,
+            colors = AppColors.Dark
+        )
     }
 }

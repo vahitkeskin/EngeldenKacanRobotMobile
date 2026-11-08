@@ -2,6 +2,7 @@ package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
@@ -697,6 +699,33 @@ private fun DrawScope.drawCorridorRays(
             text = "Sağ: ${telemetry.rightDistance}cm",
             topLeft = Offset(endX + 4f, endY - 14f),
             style = TextStyle(color = Color(0xFF60A5FA), fontSize = 8.sp, fontWeight = FontWeight.SemiBold)
+        )
+    }
+}
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun RobotDigitalTwinViewPreview() {
+    val sample = RobotTelemetry(
+        frontDistance = 35,
+        leftDistance = 50,
+        rightDistance = 40,
+        servoAngle = 90,
+        hasSignal = true
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Dark.bgPrimary)
+            .padding(bottom = 80.dp) // BNV üstünde kalacak şekilde güvenli alan
+    ) {
+        RobotDigitalTwinView(
+            telemetry = sample,
+            colors = AppColors.Dark,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

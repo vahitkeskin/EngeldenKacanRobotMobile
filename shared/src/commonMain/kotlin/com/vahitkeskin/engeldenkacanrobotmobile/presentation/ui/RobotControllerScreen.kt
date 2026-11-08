@@ -22,12 +22,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.SetSystemBarsTheme
+import com.vahitkeskin.engeldenkacanrobotmobile.data.MockTelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotState
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.repository.ITelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 🎮 RobotControllerScreen - Sanal Kokpit & Robota Doğrudan Müdahale Kumandası
@@ -402,55 +404,12 @@ private fun CockpitHeader(
     colors: AppColors,
     onEmergencyBrake: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.bgSecondary)
-            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(if (isConnected) Color(0xFF10B981) else Color(0xFFEF4444))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = Strings.cockpitTitle,
-                    color = colors.textPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = Strings.cockpitSubtitle,
-                    color = colors.textMuted,
-                    fontSize = 9.sp
-                )
-            }
-        }
-
-        // ACİL FREN BUTONU
-        Button(
-            onClick = onEmergencyBrake,
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-            modifier = Modifier.height(34.dp)
-        ) {
-            Text(
-                text = Strings.btnEmergencyStop,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White
-            )
-        }
-    }
+    ControllerHeaderCard(
+        telemetry = telemetry,
+        isConnected = isConnected,
+        colors = colors,
+        onEmergencyBrake = onEmergencyBrake
+    )
 }
 
 @Composable
@@ -707,3 +666,17 @@ private fun GearButton(
         )
     }
 }
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun RobotControllerScreenPreview() {
+    RobotControllerScreen(
+        repository = remember { MockTelemetryRepository() },
+        themeMode = ThemeMode.DARK,
+        languageMode = LanguageMode.TR
+    )
+}
+

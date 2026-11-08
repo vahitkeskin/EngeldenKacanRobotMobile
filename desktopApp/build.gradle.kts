@@ -21,8 +21,20 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.vahitkeskin.engeldenkacanrobotmobile"
+            packageName = "EKRobot"
             packageVersion = "1.0.0"
+            description = "EK Robot"
+
+            macOS {
+                iconFile.set(project.file("src/main/resources/icons/icon.icns"))
+            }
+            windows {
+                menuGroup = "EK Robot"
+                iconFile.set(project.file("src/main/resources/icons/icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icons/icon.png"))
+            }
         }
     }
 }

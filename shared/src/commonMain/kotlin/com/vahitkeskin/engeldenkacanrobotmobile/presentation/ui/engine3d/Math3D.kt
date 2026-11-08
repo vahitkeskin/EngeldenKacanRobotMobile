@@ -65,7 +65,7 @@ data class Polygon3D(
     val strokeColor: Color? = null,
     val strokeWidth: Float = 0f,
     val isDoubleSided: Boolean = true,
-    val renderLayer: Int = 3 // 0: Zemin, 1: Alt Gövde, 2: MDF Şasi/Teker, 3: Üst Donanım (Pil, Arduino, Servo), 4: Sonar
+    val renderLayer: Int = 1 // 0: Zemin Kesim Matı, 1: Katı Robot Modeli, 2: Saydam Sonar Işını
 ) {
     fun normal(): Vector3D {
         if (vertices.size < 3) return Vector3D(0f, 0f, 1f)
@@ -82,7 +82,7 @@ data class ProjectedPolygon(
     val color: Color,
     val strokeColor: Color?,
     val strokeWidth: Float,
-    val renderLayer: Int = 3
+    val renderLayer: Int = 1
 )
 
 class Camera3D(
@@ -139,7 +139,7 @@ class Camera3D(
             val v2 = transformedVerts[2]
             val normal = ((v1 - v0) cross (v2 - v0)).normalized()
 
-            // Back-face culling (Kamera bakış doğrultusu Z eksenindedir)
+            // Back-face culling (Tek taraflı poligonlar için)
             if (!poly.isDoubleSided && normal.z <= 0.05f) {
                 continue
             }
@@ -154,25 +154,25 @@ class Camera3D(
                 alpha = poly.color.alpha
             )
 
-            // Perspektif Bölme
+            // Perspektif Projeksiyon & Güvenli Z Kırpma (Anti-Disappearance / Anti-Clipping)
+            var allBehind = true
             var avgZ = 0f
             val screenPoints = ArrayList<Offset>(transformedVerts.size)
-            var allInFront = true
 
             for (tv in transformedVerts) {
                 val zCam = tv.z + cameraDistance
-                if (zCam <= 10f) {
-                    allInFront = false
-                    break
+                if (zCam > 2f) {
+                    allBehind = false
                 }
-                val scale = focalDistance / zCam
+                val safeZ = max(2f, zCam)
+                val scale = focalDistance / safeZ
                 val sx = cx + tv.x * scale
                 val sy = cy + tv.y * scale
                 screenPoints.add(Offset(sx, sy))
-                avgZ += zCam
+                avgZ += safeZ
             }
 
-            if (!allInFront || screenPoints.size < 3) continue
+            if (allBehind || screenPoints.size < 3) continue
 
             avgZ /= transformedVerts.size
 
@@ -188,22 +188,16 @@ class Camera3D(
             )
         }
 
-        // Katmanlı ve Derinlikli Sıralama (Layered Depth Sorting):
-        // Kullanıcı İsteği: "Robotu döndürdüğümde çoğu zaman pil, arduino vs vs kayboluyor hiçbirşey kaybolmasın"
-        // Normal ve üst bakışta (pitch >= -10f):
-        //   Layer 0 (Kesim matı) -> Layer 1 (Alt gövde) -> Layer 2 (MDF Şasi & Tekerler) -> Layer 3 (Üst elektronik: Pil, Arduino) -> Layer 4 (Sonar)
-        //   Böylece zemin matı veya MDF şasi pil ya da Arduino'nun üzerine ASLA çizilemez, bileşenler 360° dönüşte ASLA kaybolmaz!
-        // Alttan bakışta (pitch < -10f):
-        //   Layer 3 -> Layer 2 -> Layer 1 -> Layer 0
-        val isLookingFromBelow = pitch < -10f
+        // Katmanlı ve Derinlikli Sıralama (Painter's Algorithm):
+        // Layer 0: Zemin Kesim Matı (Arka plan / ilk çizilir, robot parçalarını asla örtmez)
+        // Layer 1: Katı Robot Modeli (MDF şasi, TT motorlar, tekerlekler, Arduino Uno, SG90 servo, HC-SR04)
+        //          depthZ azalan sıra ile sıralanır. Arkadaki parçalar önce, öndeki parçalar sonra çizilir.
+        //          360° yatay ve dikey dönüşte hiçbir parça kaybolmaz ve birbirini doğru örter!
+        // Layer 2: Yarı Saydam Sonar Işını (En son çizilir)
         projectedList.sortWith(
             Comparator { a, b ->
-                val layerDiff = if (!isLookingFromBelow) {
-                    a.renderLayer.compareTo(b.renderLayer)
-                } else {
-                    b.renderLayer.compareTo(a.renderLayer)
-                }
-                if (layerDiff != 0) layerDiff else b.depthZ.compareTo(a.depthZ)
+                val groupDiff = a.renderLayer.compareTo(b.renderLayer)
+                if (groupDiff != 0) groupDiff else b.depthZ.compareTo(a.depthZ)
             }
         )
         return projectedList

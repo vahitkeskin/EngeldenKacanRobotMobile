@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Option #5: Meraklı Kaşif - Tilted Servo Robot Silhouette -->
+    <!-- Sonar Waves -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M33,31 A33,33 0 0,1 78,31" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M38,36 A25,25 0 0,1 73,36" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M44,41 A16,16 0 0,1 67,41" />
+
+    <!-- SG90 Blue Micro-Servo Base -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineJoin="round"
+        android:pathData="M44,68 h20 v14 h-20 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,64 A4,4 0 1,1 53.9,64" />
+
+    <!-- Tilted Robot Pod Head (Rotated ~14 deg) -->
+    <group
+        android:pivotX="54"
+        android:pivotY="56"
+        android:rotation="-14">
+        <!-- Rounded Head Frame -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="2.2"
+            android:pathData="M37,47 h34 a6,6 0 0 1 6,6 v10 a6,6 0 0 1 -6,6 h-34 a6,6 0 0 1 -6,-6 v-10 a6,6 0 0 1 6,-6 z" />
+
+        <!-- Left Eye (Curious Wide Lens) -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.8"
+            android:pathData="M44,51 A6.5,6.5 0 1,1 43.9,51" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M44,56 A2.5,2.5 0 1,1 43.9,56" />
+
+        <!-- Right Eye (Focused Lens) -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.8"
+            android:pathData="M64,51 A6,6 0 1,1 63.9,51" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M64,56 A2.2,2.2 0 1,1 63.9,56" />
+
+        <!-- Cute Smile -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.4"
+            android:strokeLineCap="round"
+            android:pathData="M52,62 Q54,64 56,62" />
+    </group>
+</vector>

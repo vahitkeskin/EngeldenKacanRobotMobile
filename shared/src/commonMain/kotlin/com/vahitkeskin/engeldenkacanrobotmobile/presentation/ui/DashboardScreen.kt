@@ -30,6 +30,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun DashboardScreen(
@@ -126,6 +127,12 @@ fun DashboardScreen(
                 colors = colors
             )
 
+            // I2C VERİYOLU & AĞ BİLGİLERİ (Açılır / Kapanır UI)
+            I2CNetworkCard(
+                telemetry = telemetry,
+                colors = colors
+            )
+
             // TELEMETRİ GÜNLÜĞÜ (Kompakt ve Scroll Edilebilir Terminal)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp),
@@ -194,101 +201,10 @@ private fun HeaderCard(
     telemetry: RobotTelemetry,
     colors: AppColors
 ) {
-    val telemetryHasSignal = telemetry.hasSignal
-    val robotState = telemetry.state
-    val batPct = telemetry.batteryPercentage
-    val isChg = telemetry.isCharging
-    val batVolt = telemetry.batteryVoltage
-
-    val batColor = when {
-        isChg -> Color(0xFF10B981)
-        batPct <= 15 -> Color(0xFFEF4444)
-        batPct <= 35 -> Color(0xFFF59E0B)
-        else -> Color(0xFF10B981)
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.bgSecondary)
-            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(if (telemetryHasSignal) Color(0xFF10B981) else Color(0xFFEF4444))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = Strings.appTitle,
-                    color = colors.textPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = Strings.i2cBus,
-                    color = colors.textMuted,
-                    fontSize = 10.sp
-                )
-            }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            // BATARYA ROZETİ (Header Üzerinde)
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(batColor.copy(alpha = 0.15f))
-                    .border(0.8.dp, batColor, RoundedCornerShape(6.dp))
-                    .padding(horizontal = 6.dp, vertical = 3.dp)
-            ) {
-                Text(
-                    text = "${if (isChg) "⚡ " else "🔋 "}%$batPct",
-                    color = batColor,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            // ROBOT DURUM ROZETİ
-            val badgeText = if (!telemetryHasSignal) {
-                Strings.noSignal.uppercase()
-            } else {
-                when (robotState) {
-                    RobotState.CRUISING -> "SEYİR"
-                    RobotState.AVOIDING -> "KAÇIŞ"
-                    RobotState.MANUAL_OVERRIDE -> "MANUEL"
-                    RobotState.STOPPED -> "DURDURULDU"
-                    else -> Strings.noSignal.uppercase()
-                }
-            }
-            val badgeColor = if (telemetryHasSignal) robotState.badgeColor else Color(0xFF6B7280)
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(badgeColor)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = badgeText,
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
+    DashboardHeaderCard(
+        telemetry = telemetry,
+        colors = colors
+    )
 }
 
 @Composable
@@ -468,3 +384,17 @@ private fun SegmentTab(
         }
     }
 }
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun DashboardScreenPreview() {
+    DashboardScreen(
+        repository = remember { MockTelemetryRepository() },
+        themeMode = ThemeMode.DARK,
+        languageMode = LanguageMode.TR
+    )
+}
+

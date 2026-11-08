@@ -1,17 +1,23 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.engine3d
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.WheelDirection
 import kotlinx.coroutines.isActive
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sqrt
 
 /**
@@ -242,5 +248,33 @@ fun Robot3DViewport(
                 )
             }
         }
+    }
+}
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun Robot3DViewportPreview() {
+    val sample = RobotTelemetry(
+        frontDistance = 40,
+        servoAngle = 90,
+        hasSignal = true
+    )
+    val camera = remember { Camera3D() }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0B1120))
+            .padding(bottom = 80.dp) // BNV üstünde kalacak şekilde güvenli alan
+    ) {
+        Robot3DViewport(
+            telemetry = sample,
+            camera = camera,
+            is3dActive = true,
+            isDark = true,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

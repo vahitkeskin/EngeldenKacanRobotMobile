@@ -21,3 +21,15 @@ actual fun SetSystemBarsTheme(isDark: Boolean) {
         UIApplication.sharedApplication.setStatusBarStyle(style, animated = true)
     }
 }
+
+actual fun getRealNetworkInfo(): RealNetworkInfo {
+    return RealNetworkInfo(
+        isConnected = true,
+        ipAddress = "192.168.1.100",
+        networkName = "Wi-Fi (en0)",
+        interfaceName = "en0",
+        subnetMask = "255.255.255.0",
+        macAddress = "en0 (iOS Device)",
+        signalLevel = "Aktif"
+    )
+}

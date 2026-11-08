@@ -11,6 +11,37 @@ data class WheelState(
     val direction: WheelDirection
 )
 
+
+data class I2CRegisterEntry(
+    val regHex: String,
+    val name: String,
+    val currentValue: String,
+    val description: String
+)
+
+data class I2CBridgeInfo(
+    val slaveAddress: String = "0x08",
+    val busSpeedKhz: Int = 100,
+    val sdaPin: String = "A4 (Pin 18)",
+    val sclPin: String = "A5 (Pin 19)",
+    val busProtocol: String = "Wire (I2C Slave)",
+    val isBusHealthy: Boolean = true,
+    // Wi-Fi & Ağ Bilgileri
+    val isWifiConnected: Boolean = true,
+    val wifiSsid: String = "RobotNet_2.4G",
+    val ipAddress: String = "192.168.1.101",
+    val port: Int = 8080,
+    val gatewayIp: String = "192.168.1.1",
+    val subnetMask: String = "255.255.255.0",
+    val macAddress: String = "24:6F:28:B4:7E:12",
+    val rssiDbm: Int = -58,
+    // Protokol & Sağlık
+    val packetRateHz: Int = 20,
+    val packetLossPercent: Float = 0.0f,
+    val latencyMs: Int = 12,
+    val crcChecksumValid: Boolean = true
+)
+
 data class RobotTelemetry(
     val frontDistance: Int = -1,
     val servoAngle: Int = 90,
@@ -26,7 +57,9 @@ data class RobotTelemetry(
     // Manuel Müdahale & Kumanda Durumu
     val isManualMode: Boolean = false,
     val manualDriveCommand: String = "STOP", // FORWARD, BACKWARD, LEFT, RIGHT, STOP
-    val targetPwmSpeed: Int = 180
+    val targetPwmSpeed: Int = 180,
+    // I2C & Ağ Bilgileri
+    val i2cInfo: I2CBridgeInfo = I2CBridgeInfo()
 ) {
     val isDanger: Boolean get() = hasSignal && frontDistance in 1..15
     val isWarning: Boolean get() = hasSignal && frontDistance in 16..30
@@ -96,6 +129,20 @@ data class RobotTelemetry(
             RobotState.STOPPED, RobotState.DISCONNECTED -> WheelState(0, WheelDirection.STOPPED)
         }
     }
+
+
+    val i2cRegisters: List<I2CRegisterEntry> get() = listOf(
+        I2CRegisterEntry("0x01", "REG_FRONT_DIST", if (frontDistance > 0) "$frontDistance cm" else "--", "Ön ultrasonik engel mesafesi"),
+        I2CRegisterEntry("0x02", "REG_SERVO_ANGLE", "$servoAngle°", "SG90 radar tarama açısı (0-180°)"),
+        I2CRegisterEntry("0x03", "REG_ROBOT_STATE", "0x0${state.code} (${state.name})", "Otonom / Manuel durum kodu"),
+        I2CRegisterEntry("0x04", "REG_LEFT_DIST", if (leftDistance > 0) "$leftDistance cm" else "--", "Sol koridor tarama mesafesi"),
+        I2CRegisterEntry("0x05", "REG_RIGHT_DIST", if (rightDistance > 0) "$rightDistance cm" else "--", "Sağ koridor tarama mesafesi"),
+        I2CRegisterEntry("0x06", "REG_BATTERY_VOLT", "${(batteryVoltage * 1000).toInt()} mV (${batteryVoltage}V)", "2S Li-Ion analog okunan voltaj"),
+        I2CRegisterEntry("0x07", "REG_BATTERY_PCT", "%$batteryPercentage", "Hesaplanan Şarj Durumu (% SOC)"),
+        I2CRegisterEntry("0x08", "REG_CHARGING_STATE", if (isCharging) "0x01 (Şarjda)" else "0x00 (Kullanımda)", "Şarj cihazı algılama bayrağı"),
+        I2CRegisterEntry("0x10", "REG_COMMAND", manualDriveCommand, "Aktif sürüş yön komutu"),
+        I2CRegisterEntry("0xFF", "REG_FULL_TELEMETRY", "10B (CRC-8 OK)", "Tüm telemetri çerçeve dökümü")
+    )
 
     companion object {
         fun noSignal(): RobotTelemetry = RobotTelemetry(hasSignal = false)

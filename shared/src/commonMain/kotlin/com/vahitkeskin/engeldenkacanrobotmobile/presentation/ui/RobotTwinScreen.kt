@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vahitkeskin.engeldenkacanrobotmobile.SetSystemBarsTheme
+import com.vahitkeskin.engeldenkacanrobotmobile.data.MockTelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotState
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotTelemetry
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.WheelDirection
@@ -29,6 +30,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 🤖 RobotTwinScreen
@@ -442,3 +444,19 @@ private fun ComponentDetailCard(
         )
     }
 }
+
+// ==========================================
+// COMPOSE PREVIEW (BNV ÜSTÜ GÜVENLİ ALAN)
+// ==========================================
+@Preview
+@Composable
+private fun RobotTwinScreenPreview() {
+    RobotTwinScreen(
+        repository = remember { MockTelemetryRepository() },
+        themeMode = ThemeMode.DARK,
+        languageMode = LanguageMode.TR,
+        onThemeSelected = {},
+        onLanguageSelected = {}
+    )
+}
+

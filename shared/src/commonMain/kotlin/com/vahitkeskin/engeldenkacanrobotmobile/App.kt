@@ -1,5 +1,10 @@
 package com.vahitkeskin.engeldenkacanrobotmobile
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,9 +29,11 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.DashboardScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.Robot3DScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.RobotControllerScreen
+import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.SplashScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import kotlinx.coroutines.launch
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 📱 App - Root Multiplatform Compose Container
@@ -62,67 +69,88 @@ fun App() {
     // 3D Etkileşim Kilidi: 3D aktifken HorizontalPager kaydırma KESİNLİKLE engellenir
     var is3dActive by remember { mutableStateOf(false) }
 
-    MaterialTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colors.bgPrimary)
-        ) {
-            // 1. KAYDIRILABİLİR EKRAN SAYFALARI (Swipe / Gestures)
-            // 3D aktifken ekran kaydırma kesinlikle bloke edilir; sadece butonla geri dönülebilir!
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = if (pagerState.currentPage == 2) !is3dActive else true
-            ) { page ->
-                when (page) {
-                    0 -> DashboardScreen(
-                        repository = repository,
-                        themeMode = themeMode,
-                        languageMode = languageMode,
-                        onThemeSelected = { themeMode = it },
-                        onLanguageSelected = { languageMode = it }
-                    )
-                    1 -> RobotControllerScreen(
-                        repository = repository,
-                        themeMode = themeMode,
-                        languageMode = languageMode,
-                        onNavigateTo3D = {
-                            coroutineScope.launch { pagerState.animateScrollToPage(2) }
-                        }
-                    )
-                    2 -> Robot3DScreen(
-                        repository = repository,
-                        is3dActive = is3dActive,
-                        onToggle3dActive = { is3dActive = !is3dActive },
-                        onNavigateToTelemetry = {
-                            coroutineScope.launch { pagerState.animateScrollToPage(0) }
-                        },
-                        themeMode = themeMode,
-                        languageMode = languageMode,
-                        onThemeSelected = { themeMode = it },
-                        onLanguageSelected = { languageMode = it }
-                    )
-                }
-            }
+    // Başlangıç Teşhis ve Donanım Yükleme Ekranı (Splash Screen)
+    var showSplash by remember { mutableStateOf(true) }
 
-            // 2. BOTTOM NAVIGATION VIEW (BNV)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding() // Sistemin alt gezinme çubuğunun kesinlikle üstünde durur
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            ) {
-                BottomNavigationBar(
-                    selectedTab = pagerState.currentPage,
-                    onTabSelected = { tabIndex ->
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(tabIndex)
-                        }
-                    },
-                    colors = colors
+    MaterialTheme {
+        AnimatedContent(
+            targetState = showSplash,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+            },
+            label = "SplashTransition"
+        ) { isSplash ->
+            if (isSplash) {
+                SplashScreen(
+                    onFinished = { showSplash = false },
+                    themeMode = themeMode,
+                    languageMode = languageMode,
+                    onThemeSelected = { themeMode = it },
+                    onLanguageSelected = { languageMode = it }
                 )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(colors.bgPrimary)
+                ) {
+                    // 1. KAYDIRILABİLİR EKRAN SAYFALARI (Swipe / Gestures)
+                    // 3D aktifken ekran kaydırma kesinlikle bloke edilir; sadece butonla geri dönülebilir!
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize(),
+                        userScrollEnabled = if (pagerState.currentPage == 2) !is3dActive else true
+                    ) { page ->
+                        when (page) {
+                            0 -> DashboardScreen(
+                                repository = repository,
+                                themeMode = themeMode,
+                                languageMode = languageMode,
+                                onThemeSelected = { themeMode = it },
+                                onLanguageSelected = { languageMode = it }
+                            )
+                            1 -> RobotControllerScreen(
+                                repository = repository,
+                                themeMode = themeMode,
+                                languageMode = languageMode,
+                                onNavigateTo3D = {
+                                    coroutineScope.launch { pagerState.animateScrollToPage(2) }
+                                }
+                            )
+                            2 -> Robot3DScreen(
+                                repository = repository,
+                                is3dActive = is3dActive,
+                                onToggle3dActive = { is3dActive = !is3dActive },
+                                onNavigateToTelemetry = {
+                                    coroutineScope.launch { pagerState.animateScrollToPage(0) }
+                                },
+                                themeMode = themeMode,
+                                languageMode = languageMode,
+                                onThemeSelected = { themeMode = it },
+                                onLanguageSelected = { languageMode = it }
+                            )
+                        }
+                    }
+
+                    // 2. BOTTOM NAVIGATION VIEW (BNV)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .navigationBarsPadding() // Sistemin alt gezinme çubuğunun kesinlikle üstünde durur
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                    ) {
+                        BottomNavigationBar(
+                            selectedTab = pagerState.currentPage,
+                            onTabSelected = { tabIndex ->
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(tabIndex)
+                                }
+                            },
+                            colors = colors
+                        )
+                    }
+                }
             }
         }
     }
@@ -212,3 +240,13 @@ private fun BottomNavItem(
         }
     }
 }
+
+// ==========================================
+// COMPOSE PREVIEW
+// ==========================================
+@Preview
+@Composable
+private fun AppPreview() {
+    App()
+}
+
