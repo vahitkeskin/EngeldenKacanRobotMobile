@@ -28,6 +28,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.domain.repository.ITelemetryRepo
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -76,7 +77,7 @@ fun RobotControllerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(bottom = 76.dp)
+                .padding(bottom = 96.dp) // BNV için en az 16.dp üzerinde güvenli taban mesafesi
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -139,7 +140,7 @@ fun RobotControllerScreen(
                             label = "▲ ${Strings.btnForward}",
                             isActive = activeDriveDirection == "FORWARD",
                             colors = colors,
-                            accentColor = Color(0xFF10B981),
+                            accentColor = EKRobotColor.Status.Success,
                             modifier = Modifier.width(96.dp).height(46.dp),
                             onPress = {
                                 activeDriveDirection = "FORWARD"
@@ -160,7 +161,7 @@ fun RobotControllerScreen(
                                 label = "◀ ${Strings.btnLeft}",
                                 isActive = activeDriveDirection == "LEFT",
                                 colors = colors,
-                                accentColor = Color(0xFF3B82F6),
+                                accentColor = EKRobotColor.Brand.BlueLight,
                                 modifier = Modifier.size(width = 62.dp, height = 44.dp),
                                 onPress = {
                                     activeDriveDirection = "LEFT"
@@ -177,8 +178,8 @@ fun RobotControllerScreen(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .clip(CircleShape)
-                                    .background(if (activeDriveDirection == "STOP") Color(0xFFEF4444) else colors.bgPrimary)
-                                    .border(1.5.dp, Color(0xFFEF4444), CircleShape)
+                                    .background(if (activeDriveDirection == "STOP") EKRobotColor.Status.Danger else colors.bgPrimary)
+                                    .border(1.5.dp, EKRobotColor.Status.Danger, CircleShape)
                                     .clickable {
                                         activeDriveDirection = "STOP"
                                         repository.sendDriveCommand("STOP", 0)
@@ -187,7 +188,7 @@ fun RobotControllerScreen(
                             ) {
                                 Text(
                                     text = "■",
-                                    color = if (activeDriveDirection == "STOP") Color.White else Color(0xFFEF4444),
+                                    color = if (activeDriveDirection == "STOP") Color.White else EKRobotColor.Status.Danger,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -197,7 +198,7 @@ fun RobotControllerScreen(
                                 label = "${Strings.btnRight} ▶",
                                 isActive = activeDriveDirection == "RIGHT",
                                 colors = colors,
-                                accentColor = Color(0xFF3B82F6),
+                                accentColor = EKRobotColor.Brand.BlueLight,
                                 modifier = Modifier.size(width = 62.dp, height = 44.dp),
                                 onPress = {
                                     activeDriveDirection = "RIGHT"
@@ -215,7 +216,7 @@ fun RobotControllerScreen(
                             label = "▼ ${Strings.btnBackward}",
                             isActive = activeDriveDirection == "BACKWARD",
                             colors = colors,
-                            accentColor = Color(0xFFF59E0B),
+                            accentColor = EKRobotColor.Status.Warning,
                             modifier = Modifier.width(96.dp).height(46.dp),
                             onPress = {
                                 activeDriveDirection = "BACKWARD"
@@ -250,7 +251,7 @@ fun RobotControllerScreen(
                     // Anlık Servo Açısı
                     Text(
                         text = "${manualServoAngle.toInt()}°",
-                        color = Color(0xFF2563EB),
+                        color = EKRobotColor.Brand.BluePrimary,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -323,7 +324,7 @@ fun RobotControllerScreen(
                         )
                         Text(
                             text = "${currentSpeedPwm.toInt()} PWM (%${(currentSpeedPwm / 255f * 100).toInt()})",
-                            color = Color(0xFF2563EB),
+                            color = EKRobotColor.Brand.BluePrimary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
@@ -347,13 +348,13 @@ fun RobotControllerScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        GearButton("🌱 Eko (120)", currentSpeedPwm == 120f, colors, Modifier.weight(1f)) {
+                        GearButton(Strings.gearEco, currentSpeedPwm == 120f, colors, Modifier.weight(1f)) {
                             currentSpeedPwm = 120f
                         }
-                        GearButton("🚗 Standart (180)", currentSpeedPwm == 180f, colors, Modifier.weight(1f)) {
+                        GearButton(Strings.gearStandard, currentSpeedPwm == 180f, colors, Modifier.weight(1f)) {
                             currentSpeedPwm = 180f
                         }
-                        GearButton("🚀 Turbo (255)", currentSpeedPwm == 255f, colors, Modifier.weight(1f)) {
+                        GearButton(Strings.gearTurbo, currentSpeedPwm == 255f, colors, Modifier.weight(1f)) {
                             currentSpeedPwm = 255f
                         }
                     }
@@ -369,7 +370,7 @@ fun RobotControllerScreen(
                     onClick = { repository.triggerHorn() },
                     modifier = Modifier.weight(1f).height(42.dp),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B5CF6))
+                    colors = ButtonDefaults.buttonColors(containerColor = EKRobotColor.Brand.PurpleAccent)
                 ) {
                     Text(
                         text = Strings.btnHorn,
@@ -383,10 +384,10 @@ fun RobotControllerScreen(
                     onClick = onNavigateTo3D,
                     modifier = Modifier.weight(1f).height(42.dp),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                    colors = ButtonDefaults.buttonColors(containerColor = EKRobotColor.Brand.BluePrimary)
                 ) {
                     Text(
-                        text = "🤖 ${Strings.navRobotTwin} Görüntüle",
+                        text = Strings.viewRobotTwinBtn,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -423,10 +424,10 @@ fun BatteryStatusCard(
     val isChg = telemetry.isCharging
 
     val barColor = when {
-        isChg -> Color(0xFF10B981)
-        pct <= 15 -> Color(0xFFEF4444)
-        pct <= 35 -> Color(0xFFF59E0B)
-        else -> Color(0xFF10B981)
+        isChg -> EKRobotColor.Status.Success
+        pct <= 15 -> EKRobotColor.Status.Danger
+        pct <= 35 -> EKRobotColor.Status.Warning
+        else -> EKRobotColor.Status.Success
     }
 
     Box(
@@ -514,8 +515,8 @@ fun BatteryStatusCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = if (isChg) "⚡ Şarj Cihazını Çıkar" else "🔌 Şarja Tak (Simüle Et)",
-                    color = Color(0xFF2563EB),
+                    text = if (isChg) Strings.simChargeUnplug else Strings.simChargePlug,
+                    color = EKRobotColor.Brand.BluePrimary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
@@ -549,7 +550,7 @@ private fun DrivingModeSelector(
                 .weight(1f)
                 .fillMaxHeight()
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (!isManual) Color(0xFF10B981) else Color.Transparent)
+                .background(if (!isManual) EKRobotColor.Status.Success else Color.Transparent)
                 .clickable { onSelectMode(false) },
             contentAlignment = Alignment.Center
         ) {
@@ -567,7 +568,7 @@ private fun DrivingModeSelector(
                 .weight(1f)
                 .fillMaxHeight()
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (isManual) Color(0xFF2563EB) else Color.Transparent)
+                .background(if (isManual) EKRobotColor.Brand.BluePrimary else Color.Transparent)
                 .clickable { onSelectMode(true) },
             contentAlignment = Alignment.Center
         ) {
@@ -653,8 +654,8 @@ private fun GearButton(
         modifier = modifier
             .height(30.dp)
             .clip(RoundedCornerShape(7.dp))
-            .background(if (isSelected) Color(0xFF2563EB) else colors.bgPrimary)
-            .border(1.dp, if (isSelected) Color(0xFF2563EB) else colors.border, RoundedCornerShape(7.dp))
+            .background(if (isSelected) EKRobotColor.Brand.BluePrimary else colors.bgPrimary)
+            .border(1.dp, if (isSelected) EKRobotColor.Brand.BluePrimary else colors.border, RoundedCornerShape(7.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

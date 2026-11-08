@@ -1,13 +1,24 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.domain.model
 
 import androidx.compose.ui.graphics.Color
+import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
-enum class RobotState(val displayName: String, val badgeColor: Color, val code: Int) {
-    CRUISING("SEYİR MODU (CRUISING)", Color(0xFF10B981), 0),
-    AVOIDING("ENGEL KAÇIŞI (AVOIDING)", Color(0xFFEF4444), 1),
-    STOPPED("DURDURULDU (STOPPED)", Color(0xFFF59E0B), 2),
-    MANUAL_OVERRIDE("MANUEL MÜDAHALE (MANUAL)", Color(0xFF3B82F6), 3),
-    DISCONNECTED("BAĞLANTI YOK", Color(0xFF6B7280), -1);
+enum class RobotState(val displayNameKey: String, val badgeColor: Color, val code: Int) {
+    CRUISING("CRUISING", EKRobotColor.Status.Success, 0),
+    AVOIDING("AVOIDING", EKRobotColor.Status.Danger, 1),
+    STOPPED("STOPPED", EKRobotColor.Status.Warning, 2),
+    MANUAL_OVERRIDE("MANUAL_OVERRIDE", EKRobotColor.Brand.BlueLight, 3),
+    DISCONNECTED("DISCONNECTED", EKRobotColor.Status.Muted, -1);
+
+    val displayName: String
+        get() = when (this) {
+            CRUISING -> Strings.stateCruising
+            AVOIDING -> Strings.stateAvoiding
+            STOPPED -> Strings.stateStopped
+            MANUAL_OVERRIDE -> Strings.stateManualOverride
+            DISCONNECTED -> Strings.stateDisconnected
+        }
 
     companion object {
         fun fromCode(code: Int): RobotState {
@@ -15,4 +26,3 @@ enum class RobotState(val displayName: String, val badgeColor: Color, val code: 
         }
     }
 }
-

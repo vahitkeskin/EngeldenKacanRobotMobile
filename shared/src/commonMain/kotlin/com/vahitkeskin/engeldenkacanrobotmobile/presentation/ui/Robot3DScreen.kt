@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.engine3d.Camera3D
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.engine3d.Robot3DViewport
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.Job
@@ -263,6 +265,7 @@ fun Robot3DScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .clipToBounds()
             .background(colors.bgPrimary)
     ) {
         // 1. TAM EKRANI KAPLAYAN 3D VİEWPORT (Robot Tam Ortada ve Ekrana Hakim)
@@ -297,10 +300,12 @@ fun Robot3DScreen(
                 is3dActive = is3dActive,
                 onToggle3dActive = onToggle3dActive,
                 onReset = { animateCameraTo(-35f, 32f, 2.0f, 0f, 0f) },
-                onTopView = { animateCameraTo(45f, 80f, 2.0f, 0f, 0f) },
+                onTopView = { animateCameraTo(0f, 85f, 2.0f, 0f, 0f) },
                 onBottomView = { animateCameraTo(180f, -70f, 2.1f, 0f, 0f) },
-                onFrontView = { animateCameraTo(0f, 16f, 2.8f, 0f, 14f) },
-                onSideView = { animateCameraTo(90f, 24f, 2.3f, 0f, 0f) },
+                onFrontView = { animateCameraTo(0f, 16f, 2.6f, 0f, 12f) },
+                onRearView = { animateCameraTo(180f, 16f, 2.6f, 0f, 12f) },
+                onRightView = { animateCameraTo(90f, 20f, 2.3f, 0f, 0f) },
+                onLeftView = { animateCameraTo(-90f, 20f, 2.3f, 0f, 0f) },
                 isTourPlaying = isTourPlaying,
                 onPlayTour = { playTour() },
                 onStopTour = { stopTour() },
@@ -314,32 +319,43 @@ fun Robot3DScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(bottom = 76.dp) // Bottom Navigation Bar için güvenli boşluk
+                .padding(bottom = 96.dp) // Bottom Navigation Bar için en az 16.dp üstünde güvenli boşluk
                 .padding(horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Jest / Mod İpucu Rozeti
+            // Jest / Mod İpucu Rozeti (Açık ve Koyu Temada %100 Uyumlu & Çok Dilli)
+            val badgeBg = when {
+                isTourPlaying -> if (isDark) EKRobotColor.Alpha.AmberDarkBg else EKRobotColor.Status.WarningBgLight
+                is3dActive -> if (isDark) EKRobotColor.Alpha.SlateGlassDark else EKRobotColor.Status.SuccessBgLight
+                else -> if (isDark) EKRobotColor.Alpha.SlateGlassSoft else colors.bgSecondary.copy(alpha = 0.95f)
+            }
+            val badgeBorder = when {
+                isTourPlaying -> EKRobotColor.Status.Warning
+                is3dActive -> if (isDark) EKRobotColor.Alpha.GreenGlow else EKRobotColor.Status.Success
+                else -> if (isDark) EKRobotColor.Alpha.WhiteLine else colors.border
+            }
+            val badgeTextColor = when {
+                isTourPlaying -> if (isDark) EKRobotColor.Status.WarningGold else EKRobotColor.Status.WarningTextLight
+                is3dActive -> if (isDark) EKRobotColor.Theme.Dark.LogText else EKRobotColor.Status.SuccessTextLight
+                else -> if (isDark) EKRobotColor.Theme.Dark.TextSecondary else colors.textSecondary
+            }
+            val badgeText = when {
+                isTourPlaying -> Strings.hintTourActive
+                is3dActive -> Strings.hint3dActive
+                else -> Strings.hint3dPassive
+            }
+
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(14.dp))
-                    .background(if (isTourPlaying) Color(0xCC78350F) else if (is3dActive) Color(0xCC0F172A) else Color(0xB31E293B))
-                    .border(
-                        0.6.dp,
-                        if (isTourPlaying) Color(0xFFF59E0B) else if (is3dActive) Color(0x6610B981) else Color(0x33FFFFFF),
-                        RoundedCornerShape(14.dp)
-                    )
+                    .background(badgeBg)
+                    .border(0.6.dp, badgeBorder, RoundedCornerShape(14.dp))
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = if (isTourPlaying) {
-                        "🎬 Sinematik Sonsuz Tur Aktif • Robot her açıdan sergileniyor (Durdurmak için ekrana dokunun)"
-                    } else if (is3dActive) {
-                        "🎮 3D Aktif: 👆 Tek Parmak: 360° Döndür • ✌️ İki Parmak: Gezin & Zoom • Çift Dokun: Sıfırla"
-                    } else {
-                        "👆 Sayfa Kaydırma Modu: Ekranlar arası geçiş serbest (3D kontrol için '3D Aktif'e dokunun)"
-                    },
-                    color = if (isTourPlaying) Color(0xFFFDE047) else if (is3dActive) Color(0xFF6EE7B7) else Color(0xFFE2E8F0),
+                    text = badgeText,
+                    color = badgeTextColor,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -371,7 +387,9 @@ private fun FloatingCameraBar(
     onTopView: () -> Unit,
     onBottomView: () -> Unit,
     onFrontView: () -> Unit,
-    onSideView: () -> Unit,
+    onRearView: () -> Unit,
+    onRightView: () -> Unit,
+    onLeftView: () -> Unit,
     isTourPlaying: Boolean,
     onPlayTour: () -> Unit,
     onStopTour: () -> Unit,
@@ -404,12 +422,12 @@ private fun FloatingCameraBar(
                         .height(36.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(
-                            if (is3dActive) Color(0xFF10B981).copy(alpha = 0.22f)
+                            if (is3dActive) EKRobotColor.Status.Success.copy(alpha = 0.22f)
                             else colors.bgPrimary
                         )
                         .border(
                             1.dp,
-                            if (is3dActive) Color(0xFF10B981) else colors.border,
+                            if (is3dActive) EKRobotColor.Status.Success else colors.border,
                             RoundedCornerShape(8.dp)
                         )
                         .clickable(onClick = onToggle3dActive)
@@ -424,11 +442,11 @@ private fun FloatingCameraBar(
                             modifier = Modifier
                                 .size(7.dp)
                                 .clip(CircleShape)
-                                .background(if (is3dActive) Color(0xFF10B981) else colors.textMuted)
+                                .background(if (is3dActive) EKRobotColor.Status.Success else colors.textMuted)
                         )
                         Text(
                             text = if (is3dActive) "🔓 ${Strings.mode3dActive}" else "🔒 ${Strings.mode3dPassive}",
-                            color = if (is3dActive) Color(0xFF10B981) else colors.textPrimary,
+                            color = if (is3dActive) EKRobotColor.Status.Success else colors.textPrimary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -442,12 +460,12 @@ private fun FloatingCameraBar(
                         .height(36.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(
-                            if (isTourPlaying) Color(0xFFF59E0B).copy(alpha = 0.25f)
-                            else Color(0xFF3B82F6).copy(alpha = 0.16f)
+                            if (isTourPlaying) EKRobotColor.Status.Warning.copy(alpha = 0.25f)
+                            else EKRobotColor.Brand.BlueLight.copy(alpha = 0.16f)
                         )
                         .border(
                             1.dp,
-                            if (isTourPlaying) Color(0xFFF59E0B) else Color(0xFF3B82F6).copy(alpha = 0.5f),
+                            if (isTourPlaying) EKRobotColor.Status.Warning else EKRobotColor.Brand.BlueLight.copy(alpha = 0.5f),
                             RoundedCornerShape(8.dp)
                         )
                         .clickable {
@@ -466,7 +484,7 @@ private fun FloatingCameraBar(
                         )
                         Text(
                             text = if (isTourPlaying) Strings.tourStop else Strings.tourPlayInfinite,
-                            color = if (isTourPlaying) Color(0xFFF59E0B) else Color(0xFF60A5FA),
+                            color = if (isTourPlaying) EKRobotColor.Status.Warning else EKRobotColor.Brand.BlueMuted,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -488,7 +506,9 @@ private fun FloatingCameraBar(
                 CameraPresetChip("🔝", Strings.viewTop, colors, onClick = onTopView)
                 CameraPresetChip("🔽", Strings.viewBottom, colors, onClick = onBottomView)
                 CameraPresetChip("🚘", Strings.viewFront, colors, onClick = onFrontView)
-                CameraPresetChip("🏎️", Strings.viewSide, colors, onClick = onSideView)
+                CameraPresetChip("🚗", Strings.viewRear, colors, onClick = onRearView)
+                CameraPresetChip("➡️", Strings.viewRight, colors, onClick = onRightView)
+                CameraPresetChip("⬅️", Strings.viewLeft, colors, onClick = onLeftView)
             }
         }
     }
@@ -542,7 +562,7 @@ private fun FloatingHardwareMetrics(
         MiniMetricPill(
             title = "🏎️ " + Strings.leftWheel,
             value = if (telemetry.hasSignal) "${leftState.direction.symbol} ${leftState.speedPwm}" else "--",
-            color = if (leftState.direction == WheelDirection.FORWARD) Color(0xFF10B981) else if (leftState.direction == WheelDirection.BACKWARD) Color(0xFFEF4444) else colors.textMuted,
+            color = if (leftState.direction == WheelDirection.FORWARD) EKRobotColor.Status.Success else if (leftState.direction == WheelDirection.BACKWARD) EKRobotColor.Status.Danger else colors.textMuted,
             colors = colors,
             modifier = Modifier.weight(1f)
         )
@@ -551,7 +571,7 @@ private fun FloatingHardwareMetrics(
         MiniMetricPill(
             title = "🏎️ " + Strings.rightWheel,
             value = if (telemetry.hasSignal) "${rightState.speedPwm} ${rightState.direction.symbol}" else "--",
-            color = if (rightState.direction == WheelDirection.FORWARD) Color(0xFF10B981) else if (rightState.direction == WheelDirection.BACKWARD) Color(0xFFEF4444) else colors.textMuted,
+            color = if (rightState.direction == WheelDirection.FORWARD) EKRobotColor.Status.Success else if (rightState.direction == WheelDirection.BACKWARD) EKRobotColor.Status.Danger else colors.textMuted,
             colors = colors,
             modifier = Modifier.weight(1f)
         )
@@ -560,7 +580,7 @@ private fun FloatingHardwareMetrics(
         MiniMetricPill(
             title = "🔄 Servo",
             value = if (telemetry.hasSignal) "${telemetry.servoAngle}°" else "--°",
-            color = Color(0xFF3B82F6),
+            color = EKRobotColor.Brand.BlueLight,
             colors = colors,
             modifier = Modifier.weight(1f)
         )
@@ -568,9 +588,9 @@ private fun FloatingHardwareMetrics(
         // HC-SR04 Sensör
         val distColor = when {
             !telemetry.hasSignal -> colors.textMuted
-            telemetry.isDanger -> Color(0xFFEF4444)
-            telemetry.isWarning -> Color(0xFFF59E0B)
-            else -> Color(0xFF10B981)
+            telemetry.isDanger -> EKRobotColor.Status.Danger
+            telemetry.isWarning -> EKRobotColor.Status.Warning
+            else -> EKRobotColor.Status.Success
         }
         MiniMetricPill(
             title = "🎯 HC-SR04",

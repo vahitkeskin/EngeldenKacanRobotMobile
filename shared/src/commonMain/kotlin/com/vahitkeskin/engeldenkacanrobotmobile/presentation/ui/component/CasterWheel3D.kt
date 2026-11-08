@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,10 +26,10 @@ object CasterWheel3D {
         cx: Float = DEFAULT_CX,
         cz: Float = DEFAULT_CZ
     ) {
-        val metalColor = Color(0xFF94A3B8)
-        val swivelColor = Color(0xFF64748B)
-        val ballColor = Color(0xFFF8FAFC)
-        val screwColor = Color(0xFFCBD5E1)
+        val metalColor = EKRobotColor.Theme.Dark.TextMuted
+        val swivelColor = EKRobotColor.Theme.Light.TextMuted
+        val ballColor = EKRobotColor.Theme.Dark.TextPrimary
+        val screwColor = EKRobotColor.Theme.Dark.TextSecondary
 
         // Metal montaj taban plakası
         add3DBox(polygons, cx = cx, cy = 5f, cz = cz, width = 26f, height = 3f, depth = 26f, color = metalColor, renderLayer = 1)

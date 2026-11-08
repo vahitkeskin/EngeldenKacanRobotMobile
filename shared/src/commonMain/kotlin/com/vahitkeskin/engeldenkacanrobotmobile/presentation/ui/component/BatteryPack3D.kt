@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,21 +25,21 @@ object BatteryPack3D {
         batZ: Float = DEFAULT_Z
     ) {
         // Siyah Batarya Yuvası Kasası
-        add3DBox(polygons, cx = 0f, cy = -8f, cz = batZ, width = 64f, height = 8f, depth = 34f, color = Color(0xFF0F172A), renderLayer = 1)
+        add3DBox(polygons, cx = 0f, cy = -8f, cz = batZ, width = 64f, height = 8f, depth = 34f, color = EKRobotColor.Theme.Dark.BgPrimary, renderLayer = 1)
 
         // Ön ve Arka Yeşil Piller
-        add3DCylinder(polygons, cx = 0f, cy = -14f, cz = batZ - 8f, radius = 6.5f, height = 50f, segments = 16, color = Color(0xFF22C55E), axis = CylinderAxis.X, renderLayer = 1)
-        add3DCylinder(polygons, cx = 0f, cy = -14f, cz = batZ + 8f, radius = 6.5f, height = 50f, segments = 16, color = Color(0xFF22C55E), axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = 0f, cy = -14f, cz = batZ - 8f, radius = 6.5f, height = 50f, segments = 16, color = EKRobotColor.Status.SuccessVibrant, axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = 0f, cy = -14f, cz = batZ + 8f, radius = 6.5f, height = 50f, segments = 16, color = EKRobotColor.Status.SuccessVibrant, axis = CylinderAxis.X, renderLayer = 1)
 
         // Pozitif (+) Metal Uç Başlıkları ve Yalıtım Halkaları
-        add3DCylinder(polygons, cx = -26f, cy = -14f, cz = batZ - 8f, radius = 2.5f, height = 3f, segments = 8, color = Color(0xFFE2E8F0), axis = CylinderAxis.X, renderLayer = 1)
-        add3DCylinder(polygons, cx = -26f, cy = -14f, cz = batZ + 8f, radius = 2.5f, height = 3f, segments = 8, color = Color(0xFFE2E8F0), axis = CylinderAxis.X, renderLayer = 1)
-        add3DCylinder(polygons, cx = -24.5f, cy = -14f, cz = batZ - 8f, radius = 6.6f, height = 1.5f, segments = 8, color = Color(0xFF0F172A), axis = CylinderAxis.X, renderLayer = 1)
-        add3DCylinder(polygons, cx = -24.5f, cy = -14f, cz = batZ + 8f, radius = 6.6f, height = 1.5f, segments = 8, color = Color(0xFF0F172A), axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = -26f, cy = -14f, cz = batZ - 8f, radius = 2.5f, height = 3f, segments = 8, color = EKRobotColor.Theme.Light.RadarBg, axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = -26f, cy = -14f, cz = batZ + 8f, radius = 2.5f, height = 3f, segments = 8, color = EKRobotColor.Theme.Light.RadarBg, axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = -24.5f, cy = -14f, cz = batZ - 8f, radius = 6.6f, height = 1.5f, segments = 8, color = EKRobotColor.Theme.Dark.BgPrimary, axis = CylinderAxis.X, renderLayer = 1)
+        add3DCylinder(polygons, cx = -24.5f, cy = -14f, cz = batZ + 8f, radius = 6.6f, height = 1.5f, segments = 8, color = EKRobotColor.Theme.Dark.BgPrimary, axis = CylinderAxis.X, renderLayer = 1)
 
         // Kırmızı & Siyah Besleme Telleri
-        add3DBox(polygons, cx = -23f, cy = -6f, cz = batZ - 20f, width = 2f, height = 2f, depth = 22f, color = Color(0xFFDC2626), renderLayer = 1)
-        add3DBox(polygons, cx = -26f, cy = -6f, cz = batZ - 20f, width = 2f, height = 2f, depth = 22f, color = Color(0xFF0F172A), renderLayer = 1)
+        add3DBox(polygons, cx = -23f, cy = -6f, cz = batZ - 20f, width = 2f, height = 2f, depth = 22f, color = EKRobotColor.Status.DangerDark, renderLayer = 1)
+        add3DBox(polygons, cx = -26f, cy = -6f, cz = batZ - 20f, width = 2f, height = 2f, depth = 22f, color = EKRobotColor.Theme.Dark.BgPrimary, renderLayer = 1)
     }
 
     fun buildStandalone(): List<Polygon3D> {

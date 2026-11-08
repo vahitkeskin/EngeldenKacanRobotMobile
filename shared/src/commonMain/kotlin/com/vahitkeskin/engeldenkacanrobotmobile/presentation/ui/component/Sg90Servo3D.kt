@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,11 +30,11 @@ object Sg90Servo3D {
         val servoPivot = Vector3D(0f, -28f, -107f)
 
         // A. SABİT SG90 MİKRO SERVO MOTOR GÖVDESİ (Şeffaf Mavi TowerPro Kasa)
-        val servoBlueColor = Color(0xEE1E40AF)
-        val servoLabelColor = Color(0xFFFACC15)
-        val servoEarColor = Color(0xEE1E40AF)
-        val brassGearColor = Color(0xFFD97706)
-        val screwColor = Color(0xFFCBD5E1)
+        val servoBlueColor = EKRobotColor.Alpha.BlueGlass
+        val servoLabelColor = EKRobotColor.Status.WarningBright
+        val servoEarColor = EKRobotColor.Alpha.BlueGlass
+        val brassGearColor = EKRobotColor.Status.WarningDark
+        val screwColor = EKRobotColor.Theme.Dark.TextSecondary
 
         // 1. Ana Şeffaf Mavi Gövde (23 x 22 x 12 mm)
         add3DBox(polygons, cx = 0f, cy = -15f, cz = -105f, width = 23f, height = 22f, depth = 12f, color = servoBlueColor, renderLayer = 1)
@@ -48,21 +49,21 @@ object Sg90Servo3D {
         // 5. Pirinç Çıkış Dişli Şaftı
         add3DCylinder(polygons, cx = 0f, cy = -28.5f, cz = -107f, radius = 2.5f, height = 2f, segments = 8, color = brassGearColor, axis = CylinderAxis.Y, renderLayer = 1)
         // 6. Alttan Çıkan 3 Renkli Servo Şerit Kablosu (Kahverengi, Kırmızı, Turuncu)
-        add3DBox(polygons, cx = -2f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = Color(0xFF78350F), renderLayer = 1)
-        add3DBox(polygons, cx = 0f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = Color(0xFFDC2626), renderLayer = 1)
-        add3DBox(polygons, cx = 2f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = Color(0xFFF97316), renderLayer = 1)
+        add3DBox(polygons, cx = -2f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = EKRobotColor.Alpha.AmberDeep, renderLayer = 1)
+        add3DBox(polygons, cx = 0f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = EKRobotColor.Status.DangerDark, renderLayer = 1)
+        add3DBox(polygons, cx = 2f, cy = -4f, cz = -105f, width = 1.8f, height = 2f, depth = 12f, color = EKRobotColor.Status.Orange, renderLayer = 1)
 
         // B. DÖNEN KAFA MEKANİZMASI (0° .. 90° .. 180° SERVO AÇISI)
         val angleRad = (90 - servoAngle) * (PI.toFloat() / 180f)
 
         // 1. Beyaz Naylon Servo Kolu (Horn) ve Merkez Vidası
-        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -30f, -107f), width = 6f, height = 2f, depth = 16f, color = Color(0xFFF8FAFC), angleRad = angleRad, renderLayer = 1)
+        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -30f, -107f), width = 6f, height = 2f, depth = 16f, color = EKRobotColor.Theme.Dark.TextPrimary, angleRad = angleRad, renderLayer = 1)
         addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -31.2f, -107f), width = 2.5f, height = 0.8f, depth = 2.5f, color = screwColor, angleRad = angleRad, renderLayer = 1)
 
         // 2. Siyah Pleksi U-Braket (HC-SR04 Taşıyıcı Braket)
-        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -32.5f, -107f), width = 46f, height = 3f, depth = 8f, color = Color(0xFF0F172A), angleRad = angleRad, renderLayer = 1)
-        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(-21f, -39f, -107f), width = 3f, height = 11f, depth = 8f, color = Color(0xFF0F172A), angleRad = angleRad, renderLayer = 1)
-        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(21f, -39f, -107f), width = 3f, height = 11f, depth = 8f, color = Color(0xFF0F172A), angleRad = angleRad, renderLayer = 1)
+        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -32.5f, -107f), width = 46f, height = 3f, depth = 8f, color = EKRobotColor.Theme.Dark.BgPrimary, angleRad = angleRad, renderLayer = 1)
+        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(-21f, -39f, -107f), width = 3f, height = 11f, depth = 8f, color = EKRobotColor.Theme.Dark.BgPrimary, angleRad = angleRad, renderLayer = 1)
+        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(21f, -39f, -107f), width = 3f, height = 11f, depth = 8f, color = EKRobotColor.Theme.Dark.BgPrimary, angleRad = angleRad, renderLayer = 1)
     }
 
     fun buildStandalone(servoAngle: Int = 90): List<Polygon3D> {

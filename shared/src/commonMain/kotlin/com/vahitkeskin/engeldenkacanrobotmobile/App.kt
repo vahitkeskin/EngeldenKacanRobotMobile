@@ -1,6 +1,8 @@
 package com.vahitkeskin.engeldenkacanrobotmobile
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,9 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,6 +36,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.RobotControllerS
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.SettingsScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.SplashScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,8 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun App() {
     val repository = remember { MockTelemetryRepository() }
-    var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
-    var languageMode by remember { mutableStateOf(LanguageMode.SYSTEM) }
+    var themeMode by rememberSaveable { mutableStateOf(ThemeMode.SYSTEM) }
+    var languageMode by rememberSaveable { mutableStateOf(LanguageMode.SYSTEM) }
 
     val systemInDark = isSystemInDarkTheme()
     val isDark = when (themeMode) {
@@ -73,6 +78,19 @@ fun App() {
 
     // Başlangıç Teşhis ve Donanım Yükleme Ekranı (Splash Screen)
     var showSplash by remember { mutableStateOf(true) }
+
+    // Sayfa geçiş fonksiyonu (Kullanıcı İsteği: Yan yana veya kaydırmada animasyonlu, 1'den fazla sekme atlamasında direkt geçiş)
+    val navigateToTab: (Int) -> Unit = { targetIndex ->
+        val current = pagerState.currentPage
+        val diff = kotlin.math.abs(targetIndex - current)
+        coroutineScope.launch {
+            if (diff <= 1) {
+                pagerState.animateScrollToPage(targetIndex)
+            } else {
+                pagerState.scrollToPage(targetIndex)
+            }
+        }
+    }
 
     MaterialTheme {
         AnimatedContent(
@@ -100,40 +118,42 @@ fun App() {
                     // 3D aktifken ekran kaydırma kesinlikle bloke edilir; sadece butonla geri dönülebilir!
                     HorizontalPager(
                         state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().clipToBounds(),
                         userScrollEnabled = if (pagerState.currentPage == 2) !is3dActive else true
                     ) { page ->
-                        when (page) {
-                            0 -> DashboardScreen(
-                                repository = repository,
-                                themeMode = themeMode,
-                                languageMode = languageMode
-                            )
-                            1 -> RobotControllerScreen(
-                                repository = repository,
-                                themeMode = themeMode,
-                                languageMode = languageMode,
-                                onNavigateTo3D = {
-                                    coroutineScope.launch { pagerState.animateScrollToPage(2) }
-                                }
-                            )
-                            2 -> Robot3DScreen(
-                                repository = repository,
-                                is3dActive = is3dActive,
-                                onToggle3dActive = { is3dActive = !is3dActive },
-                                onNavigateToTelemetry = {
-                                    coroutineScope.launch { pagerState.animateScrollToPage(0) }
-                                },
-                                themeMode = themeMode,
-                                languageMode = languageMode
-                            )
-                            3 -> SettingsScreen(
-                                repository = repository,
-                                themeMode = themeMode,
-                                languageMode = languageMode,
-                                onThemeSelected = { themeMode = it },
-                                onLanguageSelected = { languageMode = it }
-                            )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clipToBounds()
+                        ) {
+                            when (page) {
+                                0 -> DashboardScreen(
+                                    repository = repository,
+                                    themeMode = themeMode,
+                                    languageMode = languageMode
+                                )
+                                1 -> RobotControllerScreen(
+                                    repository = repository,
+                                    themeMode = themeMode,
+                                    languageMode = languageMode,
+                                    onNavigateTo3D = { navigateToTab(2) }
+                                )
+                                2 -> Robot3DScreen(
+                                    repository = repository,
+                                    is3dActive = is3dActive,
+                                    onToggle3dActive = { is3dActive = !is3dActive },
+                                    onNavigateToTelemetry = { navigateToTab(0) },
+                                    themeMode = themeMode,
+                                    languageMode = languageMode
+                                )
+                                3 -> SettingsScreen(
+                                    repository = repository,
+                                    themeMode = themeMode,
+                                    languageMode = languageMode,
+                                    onThemeSelected = { themeMode = it },
+                                    onLanguageSelected = { languageMode = it }
+                                )
+                            }
                         }
                     }
 
@@ -148,11 +168,7 @@ fun App() {
                         BottomNavigationBar(
                             selectedTab = pagerState.currentPage,
                             languageMode = languageMode,
-                            onTabSelected = { tabIndex ->
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(tabIndex)
-                                }
-                            },
+                            onTabSelected = navigateToTab,
                             colors = colors
                         )
                     }
@@ -169,56 +185,77 @@ private fun BottomNavigationBar(
     onTabSelected: (Int) -> Unit,
     colors: AppColors
 ) {
-    Row(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(colors.bgSecondary.copy(alpha = 0.96f))
             .border(1.2.dp, colors.border, RoundedCornerShape(26.dp))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(4.dp)
     ) {
-        // TAB 1: TELEMETRİ
-        BottomNavItem(
-            icon = "📊",
-            label = Strings.navTelemetry,
-            isSelected = selectedTab == 0,
-            colors = colors,
-            modifier = Modifier.weight(1f),
-            onClick = { onTabSelected(0) }
+        val tabCount = 4
+        val tabWidth = maxWidth / tabCount
+        val animatedOffset by animateFloatAsState(
+            targetValue = selectedTab.toFloat(),
+            animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+            label = "BnvIndicatorOffset"
         )
 
-        // TAB 2: KUMANDA (KOKPİT)
-        BottomNavItem(
-            icon = "🎮",
-            label = Strings.navController,
-            isSelected = selectedTab == 1,
-            colors = colors,
-            modifier = Modifier.weight(1f),
-            onClick = { onTabSelected(1) }
+        // Animasyonlu Kayan Vurgu Kapsülü (Sliding Indicator Pill)
+        Box(
+            modifier = Modifier
+                .offset(x = tabWidth * animatedOffset)
+                .width(tabWidth)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(22.dp))
+                .background(EKRobotColor.Brand.BluePrimary)
         )
 
-        // TAB 3: ROBOT 3D DİJİTAL İKİZ
-        BottomNavItem(
-            icon = "🤖",
-            label = Strings.navRobotTwin,
-            isSelected = selectedTab == 2,
-            colors = colors,
-            modifier = Modifier.weight(1f),
-            onClick = { onTabSelected(2) }
-        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // TAB 1: TELEMETRİ
+            BottomNavItem(
+                icon = "📊",
+                label = Strings.navTelemetry,
+                isSelected = selectedTab == 0,
+                colors = colors,
+                modifier = Modifier.weight(1f),
+                onClick = { onTabSelected(0) }
+            )
 
-        // TAB 4: AYARLAR (Settings)
-        BottomNavItem(
-            icon = "⚙️",
-            label = Strings.navSettings,
-            isSelected = selectedTab == 3,
-            colors = colors,
-            modifier = Modifier.weight(1f),
-            onClick = { onTabSelected(3) }
-        )
+            // TAB 2: KUMANDA (KOKPİT)
+            BottomNavItem(
+                icon = "🎮",
+                label = Strings.navController,
+                isSelected = selectedTab == 1,
+                colors = colors,
+                modifier = Modifier.weight(1f),
+                onClick = { onTabSelected(1) }
+            )
+
+            // TAB 3: ROBOT 3D DİJİTAL İKİZ
+            BottomNavItem(
+                icon = "🤖",
+                label = Strings.navRobotTwin,
+                isSelected = selectedTab == 2,
+                colors = colors,
+                modifier = Modifier.weight(1f),
+                onClick = { onTabSelected(2) }
+            )
+
+            // TAB 4: AYARLAR (Settings)
+            BottomNavItem(
+                icon = "⚙️",
+                label = Strings.navSettings,
+                isSelected = selectedTab == 3,
+                colors = colors,
+                modifier = Modifier.weight(1f),
+                onClick = { onTabSelected(3) }
+            )
+        }
     }
 }
 
@@ -235,7 +272,6 @@ private fun BottomNavItem(
         modifier = modifier
             .fillMaxHeight()
             .clip(RoundedCornerShape(22.dp))
-            .background(if (isSelected) Color(0xFF2563EB) else Color.Transparent)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -245,12 +281,12 @@ private fun BottomNavItem(
         ) {
             Text(
                 text = icon,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(end = 4.dp)
+                fontSize = 13.sp,
+                modifier = Modifier.padding(end = 3.dp)
             )
             Text(
                 text = label,
-                fontSize = 11.sp,
+                fontSize = 10.5.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                 color = if (isSelected) Color.White else colors.textMuted
             )

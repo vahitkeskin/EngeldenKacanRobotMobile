@@ -27,6 +27,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.domain.repository.ITelemetryRepo
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 
 /**
@@ -67,7 +68,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(bottom = 80.dp) // BNV için güvenli taban mesafesi
+                .padding(bottom = 96.dp) // BNV için en az 16.dp üzerinde güvenli taban mesafesi
                 .imePadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -189,12 +190,12 @@ fun SettingsScreen(
                 colors = colors
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HardwareInfoRow("Mikrodenetleyici", "Arduino Uno R3 (ATmega328P @ 16 MHz)", colors)
-                    HardwareInfoRow("I2C Veriyolu", "Slave Adresi 0x08 • Standart Hız 100 kHz", colors)
-                    HardwareInfoRow("Motor Sürücü", "L298N Çift H-Köprüsü (2x TT DC Motor)", colors)
-                    HardwareInfoRow("Ultrasonik Sonar", "HC-SR04 (2-400 cm Hassasiyet)", colors)
-                    HardwareInfoRow("Servo Motor", "TowerPro SG90 9g Mikro Servo (0° - 180°)", colors)
-                    HardwareInfoRow("Güç Kaynağı", "2x 18650 Li-Ion (7.4V Nominal / 8.4V Peak)", colors)
+                    HardwareInfoRow(Strings.hwMcu, Strings.hwMcuDesc, colors)
+                    HardwareInfoRow(Strings.hwI2cBus, Strings.hwI2cDesc, colors)
+                    HardwareInfoRow(Strings.hwMotorDriver, Strings.hwMotorDesc, colors)
+                    HardwareInfoRow(Strings.hwSonar, Strings.hwSonarDesc, colors)
+                    HardwareInfoRow(Strings.hwServo, Strings.hwServoDesc, colors)
+                    HardwareInfoRow(Strings.hwPowerSupply, Strings.hwPowerDesc, colors)
                 }
             }
 
@@ -208,11 +209,11 @@ fun SettingsScreen(
                 colors = colors
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    HardwareInfoRow("Uygulama Adı", "EK Robot", colors)
-                    HardwareInfoRow("Sürüm", Strings.splashVersion, colors)
-                    HardwareInfoRow("Mimari", "Kotlin Multiplatform & Jetpack Compose", colors)
-                    HardwareInfoRow("Platformlar", "Android • iOS • Desktop (Mac/Win/Linux)", colors)
-                    HardwareInfoRow("Geliştirici", Strings.splashDevelopedBy, colors)
+                    HardwareInfoRow(Strings.hwAppName, "EK Robot", colors)
+                    HardwareInfoRow(Strings.hwAppVersion, Strings.splashVersion, colors)
+                    HardwareInfoRow(Strings.hwArch, Strings.hwArchDesc, colors)
+                    HardwareInfoRow(Strings.hwPlatforms, Strings.hwPlatformsDesc, colors)
+                    HardwareInfoRow(Strings.hwDeveloper, Strings.splashDevelopedBy, colors)
                 }
             }
 
@@ -281,10 +282,10 @@ private fun ThemeOptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) Color(0xFF2563EB).copy(alpha = 0.12f) else colors.bgPrimary)
+            .background(if (isSelected) EKRobotColor.Brand.BluePrimary.copy(alpha = 0.12f) else colors.bgPrimary)
             .border(
                 width = if (isSelected) 1.5.dp else 0.8.dp,
-                color = if (isSelected) Color(0xFF2563EB) else colors.border,
+                color = if (isSelected) EKRobotColor.Brand.BluePrimary else colors.border,
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable(onClick = onClick)
@@ -320,10 +321,10 @@ private fun ThemeOptionRow(
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
-                    .background(if (isSelected) Color(0xFF2563EB) else Color.Transparent)
+                    .background(if (isSelected) EKRobotColor.Brand.BluePrimary else Color.Transparent)
                     .border(
                         1.5.dp,
-                        if (isSelected) Color(0xFF2563EB) else colors.border,
+                        if (isSelected) EKRobotColor.Brand.BluePrimary else colors.border,
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -354,10 +355,10 @@ private fun LanguageOptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) Color(0xFF2563EB).copy(alpha = 0.12f) else colors.bgPrimary)
+            .background(if (isSelected) EKRobotColor.Brand.BluePrimary.copy(alpha = 0.12f) else colors.bgPrimary)
             .border(
                 width = if (isSelected) 1.5.dp else 0.8.dp,
-                color = if (isSelected) Color(0xFF2563EB) else colors.border,
+                color = if (isSelected) EKRobotColor.Brand.BluePrimary else colors.border,
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable(onClick = onClick)
@@ -393,10 +394,10 @@ private fun LanguageOptionRow(
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
-                    .background(if (isSelected) Color(0xFF2563EB) else Color.Transparent)
+                    .background(if (isSelected) EKRobotColor.Brand.BluePrimary else Color.Transparent)
                     .border(
                         1.5.dp,
-                        if (isSelected) Color(0xFF2563EB) else colors.border,
+                        if (isSelected) EKRobotColor.Brand.BluePrimary else colors.border,
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center

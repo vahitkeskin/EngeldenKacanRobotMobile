@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -82,8 +83,8 @@ fun I2CNetworkCard(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF2563EB).copy(alpha = 0.15f))
-                            .border(0.8.dp, Color(0xFF2563EB).copy(alpha = 0.35f), CircleShape),
+                            .background(EKRobotColor.Brand.BluePrimary.copy(alpha = 0.15f))
+                            .border(0.8.dp, EKRobotColor.Brand.BluePrimary.copy(alpha = 0.35f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "🌐", fontSize = 16.sp)
@@ -109,16 +110,16 @@ fun I2CNetworkCard(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(
-                                        if (telemetry.hasSignal) Color(0xFF10B981).copy(alpha = 0.15f)
-                                        else Color(0xFF64748B).copy(alpha = 0.15f)
+                                        if (telemetry.hasSignal) EKRobotColor.Status.Success.copy(alpha = 0.15f)
+                                        else EKRobotColor.Theme.Light.TextMuted.copy(alpha = 0.15f)
                                     )
                                     .padding(horizontal = 5.dp, vertical = 1.dp)
                             ) {
                                 Text(
-                                    text = if (telemetry.hasSignal) "● CANLI" else "○ BEKLEMEDE",
+                                    text = if (telemetry.hasSignal) "● ${Strings.statusLive}" else "○ ${Strings.statusStandby}",
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted
+                                    color = if (telemetry.hasSignal) EKRobotColor.Status.Success else colors.textMuted
                                 )
                             }
                         }
@@ -133,7 +134,7 @@ fun I2CNetworkCard(
                                 fontSize = 10.sp,
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF0EA5E9)
+                                color = EKRobotColor.Brand.SkyAccent
                             )
                             Text(
                                 text = "•",
@@ -205,15 +206,15 @@ fun I2CNetworkCard(
                             title = Strings.i2cSlaveAddr,
                             value = "$i2cAddress (7-bit)",
                             subtext = "Atmega328P Hardware Slave",
-                            highlightColor = Color(0xFF0EA5E9),
+                            highlightColor = EKRobotColor.Brand.SkyAccent,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
                         InfoBox(
                             title = Strings.i2cBusSpeed,
                             value = i2cSpeed,
-                            subtext = "16 MHz Osilatör",
-                            highlightColor = Color(0xFF10B981),
+                            subtext = Strings.i2cOscillator,
+                            highlightColor = EKRobotColor.Status.Success,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
@@ -227,15 +228,15 @@ fun I2CNetworkCard(
                             title = Strings.i2cPins,
                             value = "$sdaPin | $sclPin",
                             subtext = "Dahili 20-50 kΩ Pull-up",
-                            highlightColor = Color(0xFFF59E0B),
+                            highlightColor = EKRobotColor.Status.Warning,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
                         InfoBox(
                             title = Strings.i2cStatus,
-                            value = if (telemetry.hasSignal) "● Aktif Veri Hattı" else "○ Bağlantı Bekleniyor",
+                            value = if (telemetry.hasSignal) Strings.i2cActiveLine else Strings.i2cWaitingLine,
                             subtext = "Wire.h Slave Callback",
-                            highlightColor = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
+                            highlightColor = if (telemetry.hasSignal) EKRobotColor.Status.Success else colors.textMuted,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
@@ -260,17 +261,17 @@ fun I2CNetworkCard(
                         NetworkRow(
                             label = Strings.wifiSsidLabel,
                             value = realNet.networkName,
-                            accentColor = Color(0xFF3B82F6),
+                            accentColor = EKRobotColor.Brand.BlueLight,
                             colors = colors
                         )
                         NetworkRow(
                             label = Strings.ipAddressLabel,
                             value = realNet.ipAddress,
-                            accentColor = Color(0xFF10B981),
+                            accentColor = EKRobotColor.Status.Success,
                             colors = colors
                         )
                         NetworkRow(
-                            label = "Ağ Arabirimi (Interface)",
+                            label = Strings.i2cNetworkInterface,
                             value = realNet.interfaceName,
                             accentColor = colors.textPrimary,
                             colors = colors
@@ -291,7 +292,7 @@ fun I2CNetworkCard(
                             NetworkRow(
                                 label = Strings.rssiLabel,
                                 value = realNet.signalLevel,
-                                accentColor = Color(0xFF10B981),
+                                accentColor = EKRobotColor.Status.Success,
                                 colors = colors
                             )
                         }
@@ -324,7 +325,7 @@ fun I2CNetworkCard(
                     // BÖLÜM 4: DONANIM VE BATARYA ENTEGRASYONU
                     SectionHeader(
                         icon = "🔋",
-                        title = "DONANIM ENTEGRASYON BİLGİSİ",
+                        title = Strings.i2cHardwareIntegration,
                         colors = colors
                     )
 
@@ -333,18 +334,18 @@ fun I2CNetworkCard(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         InfoBox(
-                            title = "Batarya Kimyası",
+                            title = Strings.i2cBatteryChemistry,
                             value = "2S 18650 Li-Ion",
                             subtext = "7.4V Nom / 8.4V Tepe (ADC A0)",
-                            highlightColor = Color(0xFF10B981),
+                            highlightColor = EKRobotColor.Status.Success,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
                         InfoBox(
-                            title = "Seri / I2C Baud Hızı",
+                            title = Strings.i2cBaudRate,
                             value = "115200 Baud",
-                            subtext = "8-N-1 UART Köprüsü",
-                            highlightColor = Color(0xFF3B82F6),
+                            subtext = Strings.i2cUartBridge,
+                            highlightColor = EKRobotColor.Brand.BlueLight,
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
@@ -363,10 +364,10 @@ fun I2CNetworkCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "▲ Ekranın Başına Hizala",
+                                text = Strings.i2cScrollToTop,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF0EA5E9),
+                                color = EKRobotColor.Brand.SkyAccent,
                                 letterSpacing = 0.3.sp
                             )
                         }
@@ -490,7 +491,7 @@ private fun RegisterRow(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(3.dp))
-                    .background(Color(0xFF2563EB).copy(alpha = 0.15f))
+                    .background(EKRobotColor.Brand.BluePrimary.copy(alpha = 0.15f))
                     .padding(horizontal = 4.dp, vertical = 1.dp)
             ) {
                 Text(
@@ -498,7 +499,7 @@ private fun RegisterRow(
                     fontSize = 9.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF3B82F6)
+                    color = EKRobotColor.Brand.BlueLight
                 )
             }
             Text(
@@ -513,7 +514,7 @@ private fun RegisterRow(
             fontSize = 9.sp,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF10B981)
+            color = EKRobotColor.Status.Success
         )
     }
 }

@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,10 +33,10 @@ object Hcsr04Sensor3D {
 
         // C. HC-SR04 ULTRASONİK SENSÖRÜ (Kraliyet Mavisi PCB, 4 Köşe Delikleri, Kristal Osilatör, 4-Pin Header, 2x 24-Segment Göz)
         val pcbCenter = Vector3D(0f, -42f, -111f)
-        val pcbBlueColor = Color(0xFF1565C0) // Parlak Kraliyet Mavisi PCB
-        val holeCopperColor = Color(0xFFD97706)
-        val crystalSilverColor = Color(0xFFCBD5E1)
-        val pinGoldColor = Color(0xFFF59E0B)
+        val pcbBlueColor = EKRobotColor.Brand.Indigo // Parlak Kraliyet Mavisi PCB
+        val holeCopperColor = EKRobotColor.Status.WarningDark
+        val crystalSilverColor = EKRobotColor.Theme.Dark.TextSecondary
+        val pinGoldColor = EKRobotColor.Status.Warning
 
         // 1. Mavi PCB Kartı
         addRotatedBox(polygons, pivot = servoPivot, center = pcbCenter, width = 50f, height = 22f, depth = 2.2f, color = pcbBlueColor, angleRad = angleRad, renderLayer = 1)
@@ -55,7 +56,7 @@ object Hcsr04Sensor3D {
         addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -42f, -112.5f), width = 8f, height = 4f, depth = 2f, color = crystalSilverColor, angleRad = angleRad, renderLayer = 1)
 
         // 4. Alt 4 Pinli Header (VCC, TRIG, ECHO, GND)
-        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -30f, -111f), width = 12f, height = 3.5f, depth = 3.5f, color = Color(0xFF0F172A), angleRad = angleRad, renderLayer = 1)
+        addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(0f, -30f, -111f), width = 12f, height = 3.5f, depth = 3.5f, color = EKRobotColor.Theme.Dark.BgPrimary, angleRad = angleRad, renderLayer = 1)
         for (pinX in listOf(-4.5f, -1.5f, 1.5f, 4.5f)) {
             addRotatedBox(polygons, pivot = servoPivot, center = Vector3D(pinX, -27f, -111f), width = 1.2f, height = 3.5f, depth = 1.2f, color = pinGoldColor, angleRad = angleRad, renderLayer = 1)
         }
@@ -106,10 +107,10 @@ object Hcsr04Sensor3D {
         angleRad: Float
     ) {
         val segments = 24
-        val silverAlumColor = Color(0xFFE2E8F0) // Fırçalanmış parlak alüminyum gövde
-        val rimColor = Color(0xFFCBD5E1)        // Ön çerçeve bileziği
-        val meshColor = Color(0xFF0F172A)       // Akustik siyah ızgara kapağı
-        val piezoDotColor = Color(0xFFE2E8F0)   // Merkez piezo seramik sensör noktası
+        val silverAlumColor = EKRobotColor.Theme.Light.RadarBg // Fırçalanmış parlak alüminyum gövde
+        val rimColor = EKRobotColor.Theme.Dark.TextSecondary        // Ön çerçeve bileziği
+        val meshColor = EKRobotColor.Theme.Dark.BgPrimary       // Akustik siyah ızgara kapağı
+        val piezoDotColor = EKRobotColor.Theme.Light.RadarBg   // Merkez piezo seramik sensör noktası
 
         val frontZ = center.z - depth
         val backZ = center.z
@@ -176,7 +177,7 @@ object Hcsr04Sensor3D {
             pivot = pivot,
             center = Vector3D(center.x + labelOffset, center.y, center.z - 0.5f),
             width = 2.5f, height = 2.5f, depth = 0.5f,
-            color = Color(0xFFCBD5E1),
+            color = EKRobotColor.Theme.Dark.TextSecondary,
             angleRad = angleRad,
             renderLayer = 1
         )
@@ -194,9 +195,9 @@ object Hcsr04Sensor3D {
         val spreadRadius = beamLength * 0.32f
 
         val beamColor = when {
-            distanceCm <= 15 -> Color(0xFFEF4444) // TEHLİKE / KIRMIZI
-            distanceCm <= 30 -> Color(0xFFF59E0B) // UYARI / SARI
-            else -> Color(0xFF10B981)             // GÜVENLİ / YEŞİL
+            distanceCm <= 15 -> EKRobotColor.Status.Danger // TEHLİKE / KIRMIZI
+            distanceCm <= 30 -> EKRobotColor.Status.Warning // UYARI / SARI
+            else -> EKRobotColor.Status.Success             // GÜVENLİ / YEŞİL
         }
 
         val apexRaw = headCenter

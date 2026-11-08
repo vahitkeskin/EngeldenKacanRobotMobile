@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,11 +37,11 @@ object RightWheel3D {
         thickness: Float = DEFAULT_THICKNESS
     ) {
         val segments = 32
-        val tireColor = Color(0xFF1E293B)
-        val tireDarkColor = Color(0xFF0F172A)
-        val hubColor = Color(0xFFFACC15)
-        val hubBorderColor = Color(0xFFEAB308)
-        val axleColor = Color(0xFF0F172A)
+        val tireColor = EKRobotColor.Theme.Dark.BgSecondary
+        val tireDarkColor = EKRobotColor.Theme.Dark.BgPrimary
+        val hubColor = EKRobotColor.Status.WarningBright
+        val hubBorderColor = EKRobotColor.Status.WarningYellow
+        val axleColor = EKRobotColor.Theme.Dark.BgPrimary
 
         val halfT = thickness / 2f
         val outerX = cx + halfT // Sağ tekerlek: dış yüzey +X yönünde
@@ -85,7 +86,7 @@ object RightWheel3D {
         for (i in 0 until segments) {
             val next = (i + 1) % segments
             val treadTone = if (i % 2 == 0) tireColor else tireDarkColor
-            polygons.add(Polygon3D(listOf(outerTirePts[i], outerTirePts[next], innerTirePts[next], innerTirePts[i]), treadTone, strokeColor = Color(0xFF334155), strokeWidth = 0.3f, isDoubleSided = true, renderLayer = 1))
+            polygons.add(Polygon3D(listOf(outerTirePts[i], outerTirePts[next], innerTirePts[next], innerTirePts[i]), treadTone, strokeColor = EKRobotColor.Theme.Dark.Border, strokeWidth = 0.3f, isDoubleSided = true, renderLayer = 1))
         }
 
         // 5. İç Yüzey

@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -117,17 +118,17 @@ fun SplashScreen(
     val bgGradient = if (isDark) {
         Brush.verticalGradient(
             listOf(
-                Color(0xFF060914),
-                Color(0xFF090D1C),
-                Color(0xFF060914)
+                EKRobotColor.Alpha.NightDark,
+                EKRobotColor.Alpha.NightDeeper,
+                EKRobotColor.Alpha.NightDark
             )
         )
     } else {
         Brush.verticalGradient(
             listOf(
-                Color(0xFFF8FAFC),
-                Color(0xFFF1F5F9),
-                Color(0xFFE2E8F0)
+                EKRobotColor.Theme.Dark.TextPrimary,
+                EKRobotColor.Theme.Light.BgPrimary,
+                EKRobotColor.Theme.Light.RadarBg
             )
         )
     }
@@ -162,7 +163,7 @@ fun SplashScreen(
                     val phase = (sonarPulse + i * 0.33f) % 1f
                     val waveRadius = 90.dp.toPx() + phase * 85.dp.toPx()
                     val waveAlpha = ((1f - phase) * 0.45f).coerceIn(0f, 1f)
-                    val waveColor = if (isDark) Color(0xFF00E5FF) else Color(0xFF0284C7)
+                    val waveColor = if (isDark) EKRobotColor.Brand.CyanAccent else EKRobotColor.Brand.SkyCyan
 
                     drawCircle(
                         color = waveColor.copy(alpha = waveAlpha),
@@ -176,7 +177,7 @@ fun SplashScreen(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            (if (isDark) Color(0xFF00E5FF) else Color(0xFF38BDF8)).copy(alpha = 0.18f),
+                            (if (isDark) EKRobotColor.Brand.CyanAccent else EKRobotColor.Brand.SkyLight).copy(alpha = 0.18f),
                             Color.Transparent
                         ),
                         center = Offset(cx, cy),
@@ -197,18 +198,18 @@ fun SplashScreen(
                     .shadow(
                         elevation = if (isDark) 20.dp else 14.dp,
                         shape = RoundedCornerShape(44.dp),
-                        ambientColor = if (isDark) Color(0xFF00E5FF).copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.08f),
-                        spotColor = if (isDark) Color(0xFF2563EB).copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.12f)
+                        ambientColor = if (isDark) EKRobotColor.Brand.CyanAccent.copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.08f),
+                        spotColor = if (isDark) EKRobotColor.Brand.BluePrimary.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.12f)
                     )
                     .clip(RoundedCornerShape(44.dp))
-                    .background(Color(0xFF060914))
+                    .background(EKRobotColor.Alpha.NightDark)
                     .border(
                         width = 1.2.dp,
                         brush = Brush.linearGradient(
                             listOf(
-                                Color(0xFF00E5FF).copy(alpha = if (isDark) 0.6f else 0.4f),
-                                Color(0xFF2563EB).copy(alpha = if (isDark) 0.3f else 0.2f),
-                                Color(0xFF00E5FF).copy(alpha = if (isDark) 0.5f else 0.3f)
+                                EKRobotColor.Brand.CyanAccent.copy(alpha = if (isDark) 0.6f else 0.4f),
+                                EKRobotColor.Brand.BluePrimary.copy(alpha = if (isDark) 0.3f else 0.2f),
+                                EKRobotColor.Brand.CyanAccent.copy(alpha = if (isDark) 0.5f else 0.3f)
                             )
                         ),
                         shape = RoundedCornerShape(44.dp)
@@ -239,12 +240,12 @@ fun SplashScreen(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(
-                        if (isDark) Color(0xFF1E293B).copy(alpha = 0.5f)
+                        if (isDark) EKRobotColor.Theme.Dark.BgSecondary.copy(alpha = 0.5f)
                         else Color.White.copy(alpha = 0.85f)
                     )
                     .border(
                         width = 0.8.dp,
-                        color = if (isDark) Color(0xFF334155).copy(alpha = 0.6f) else Color(0xFFE2E8F0),
+                        color = if (isDark) EKRobotColor.Theme.Dark.Border.copy(alpha = 0.6f) else EKRobotColor.Theme.Light.RadarBg,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 7.dp)
@@ -254,7 +255,7 @@ fun SplashScreen(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(if (isDark) Color(0xFF38BDF8) else Color(0xFF0284C7))
+                        .background(if (isDark) EKRobotColor.Brand.SkyLight else EKRobotColor.Brand.SkyCyan)
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -263,7 +264,7 @@ fun SplashScreen(
                     text = Strings.splashDevelopedBy,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
-                    color = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B),
+                    color = if (isDark) EKRobotColor.Theme.Dark.TextMuted else EKRobotColor.Theme.Light.TextMuted,
                     letterSpacing = 0.4.sp
                 )
             }

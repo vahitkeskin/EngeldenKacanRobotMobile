@@ -21,32 +21,31 @@ data class AppColors(
 ) {
     companion object {
         val Dark = AppColors(
-            bgPrimary = Color(0xFF0F172A),
-            bgSecondary = Color(0xFF1E293B),
-            bgCard = Color(0xFF1E293B),
-            border = Color(0xFF334155),
-            textPrimary = Color(0xFFF8FAFC),
-            textSecondary = Color(0xFFCBD5E1),
-            textMuted = Color(0xFF94A3B8),
-            radarBg = Color(0xFF0F172A),
-            radarGrid = Color(0xFF334155),
-            logBg = Color(0xFF030712),
-            logText = Color(0xFF6EE7B7)
+            bgPrimary = EKRobotColor.Theme.Dark.BgPrimary,
+            bgSecondary = EKRobotColor.Theme.Dark.BgSecondary,
+            bgCard = EKRobotColor.Theme.Dark.BgCard,
+            border = EKRobotColor.Theme.Dark.Border,
+            textPrimary = EKRobotColor.Theme.Dark.TextPrimary,
+            textSecondary = EKRobotColor.Theme.Dark.TextSecondary,
+            textMuted = EKRobotColor.Theme.Dark.TextMuted,
+            radarBg = EKRobotColor.Theme.Dark.BgPrimary,
+            radarGrid = EKRobotColor.Theme.Dark.Border,
+            logBg = EKRobotColor.Theme.Dark.LogBg,
+            logText = EKRobotColor.Theme.Dark.LogText
         )
 
         val Light = AppColors(
-            bgPrimary = Color(0xFFF1F5F9),
-            bgSecondary = Color(0xFFFFFFFF),
-            bgCard = Color(0xFFFFFFFF),
-            border = Color(0xFFCBD5E1),
-            textPrimary = Color(0xFF0F172A),
-            textSecondary = Color(0xFF334155),
-            textMuted = Color(0xFF64748B),
-            radarBg = Color(0xFFE2E8F0),
-            radarGrid = Color(0xFF94A3B8),
-            logBg = Color(0xFFF8FAFC),
-            logText = Color(0xFF059669)
+            bgPrimary = EKRobotColor.Theme.Light.BgPrimary,
+            bgSecondary = EKRobotColor.Theme.Light.BgSecondary,
+            bgCard = EKRobotColor.Theme.Light.BgCard,
+            border = EKRobotColor.Theme.Light.Border,
+            textPrimary = EKRobotColor.Theme.Light.TextPrimary,
+            textSecondary = EKRobotColor.Theme.Light.TextSecondary,
+            textMuted = EKRobotColor.Theme.Light.TextMuted,
+            radarBg = EKRobotColor.Theme.Light.RadarBg,
+            radarGrid = EKRobotColor.Theme.Light.RadarGrid,
+            logBg = EKRobotColor.Theme.Light.LogBg,
+            logText = EKRobotColor.Theme.Light.LogText
         )
     }
 }
-

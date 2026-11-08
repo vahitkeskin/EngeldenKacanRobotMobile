@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,22 +25,22 @@ object L298NDriver3D {
         l298nZ: Float = DEFAULT_Z
     ) {
         // Kırmızı PCB Kartı
-        add3DBox(polygons, cx = 0f, cy = -6f, cz = l298nZ, width = 50f, height = 4f, depth = 42f, color = Color(0xFFDC2626), renderLayer = 1)
+        add3DBox(polygons, cx = 0f, cy = -6f, cz = l298nZ, width = 50f, height = 4f, depth = 42f, color = EKRobotColor.Status.DangerDark, renderLayer = 1)
 
         // Alüminyum Siyah Soğutucu Gövdesi ve Kanatçıkları
-        add3DBox(polygons, cx = 0f, cy = -16f, cz = l298nZ, width = 28f, height = 16f, depth = 22f, color = Color(0xFF0F172A), renderLayer = 1)
-        val finColor = Color(0xFF334155)
+        add3DBox(polygons, cx = 0f, cy = -16f, cz = l298nZ, width = 28f, height = 16f, depth = 22f, color = EKRobotColor.Theme.Dark.BgPrimary, renderLayer = 1)
+        val finColor = EKRobotColor.Theme.Dark.Border
         for (finX in listOf(-9f, -3f, 3f, 9f)) {
             add3DBox(polygons, cx = finX, cy = -25f, cz = l298nZ, width = 2f, height = 4f, depth = 20f, color = finColor, renderLayer = 1)
         }
 
         // İki Adet Filtre Kondansatörü
-        add3DCylinder(polygons, cx = -16f, cy = -12f, cz = l298nZ + 12f, radius = 4f, height = 10f, segments = 8, color = Color(0xFF0F172A), axis = CylinderAxis.Y, renderLayer = 1)
-        add3DCylinder(polygons, cx = 16f, cy = -12f, cz = l298nZ + 12f, radius = 4f, height = 10f, segments = 8, color = Color(0xFF0F172A), axis = CylinderAxis.Y, renderLayer = 1)
+        add3DCylinder(polygons, cx = -16f, cy = -12f, cz = l298nZ + 12f, radius = 4f, height = 10f, segments = 8, color = EKRobotColor.Theme.Dark.BgPrimary, axis = CylinderAxis.Y, renderLayer = 1)
+        add3DCylinder(polygons, cx = 16f, cy = -12f, cz = l298nZ + 12f, radius = 4f, height = 10f, segments = 8, color = EKRobotColor.Theme.Dark.BgPrimary, axis = CylinderAxis.Y, renderLayer = 1)
 
         // Mavi Klemens Blokları ve Gümüş Vidaları
-        val termBlue = Color(0xFF2563EB)
-        val screwSilver = Color(0xFFCBD5E1)
+        val termBlue = EKRobotColor.Brand.BluePrimary
+        val screwSilver = EKRobotColor.Theme.Dark.TextSecondary
         add3DBox(polygons, cx = -20f, cy = -10f, cz = l298nZ, width = 8f, height = 8f, depth = 14f, color = termBlue, renderLayer = 1)
         add3DBox(polygons, cx = 20f, cy = -10f, cz = l298nZ, width = 8f, height = 8f, depth = 14f, color = termBlue, renderLayer = 1)
         add3DBox(polygons, cx = 0f, cy = -10f, cz = l298nZ + 16f, width = 16f, height = 8f, depth = 8f, color = termBlue, renderLayer = 1)

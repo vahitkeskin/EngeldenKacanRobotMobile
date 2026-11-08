@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,12 +17,12 @@ object WireHarness3D {
 
     fun build(polygons: ArrayList<Polygon3D>) {
         val wireColors = listOf(
-            Color(0xFF0F172A), // Siyah
-            Color(0xFF2563EB), // Mavi
-            Color(0xFFF8FAFC), // Beyaz
-            Color(0xFF78350F), // Kahverengi
-            Color(0xFFDC2626), // Kırmızı
-            Color(0xFF64748B)  // Gri
+            EKRobotColor.Theme.Dark.BgPrimary, // Siyah
+            EKRobotColor.Brand.BluePrimary, // Mavi
+            EKRobotColor.Theme.Dark.TextPrimary, // Beyaz
+            EKRobotColor.Alpha.AmberDeep, // Kahverengi
+            EKRobotColor.Status.DangerDark, // Kırmızı
+            EKRobotColor.Theme.Light.TextMuted  // Gri
         )
 
         val wireCount = wireColors.size
@@ -38,7 +39,7 @@ object WireHarness3D {
         }
 
         // Siyah Kablo Bağı (Zip Tie)
-        add3DBox(polygons, cx = 0f, cy = -27f, cz = -42f, width = wireCount * wireWidth + 4f, height = 5f, depth = 5f, color = Color(0xFF0F172A), renderLayer = 1)
+        add3DBox(polygons, cx = 0f, cy = -27f, cz = -42f, width = wireCount * wireWidth + 4f, height = 5f, depth = 5f, color = EKRobotColor.Theme.Dark.BgPrimary, renderLayer = 1)
     }
 
     fun buildStandalone(): List<Polygon3D> {

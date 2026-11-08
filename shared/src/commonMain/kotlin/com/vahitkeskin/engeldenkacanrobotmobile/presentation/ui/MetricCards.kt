@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,9 +49,9 @@ fun MetricCards(
         ) {
             if (telemetry.hasSignal) {
                 val distColor = when {
-                    telemetry.isDanger -> Color(0xFFEF4444)
-                    telemetry.isWarning -> Color(0xFFF59E0B)
-                    else -> Color(0xFF34D399)
+                    telemetry.isDanger -> EKRobotColor.Status.Danger
+                    telemetry.isWarning -> EKRobotColor.Status.Warning
+                    else -> EKRobotColor.Status.SuccessLight
                 }
 
                 Text(
@@ -80,7 +81,7 @@ fun MetricCards(
                 )
                 Text(
                     text = "[${Strings.noSignal.uppercase()}]",
-                    color = Color(0xFFEF4444),
+                    color = EKRobotColor.Status.Danger,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -91,9 +92,9 @@ fun MetricCards(
 
         val progress = if (telemetry.hasSignal) (telemetry.frontDistance / 100f).coerceIn(0f, 1f) else 0f
         val progressColor = when {
-            telemetry.isDanger -> Color(0xFFEF4444)
-            telemetry.isWarning -> Color(0xFFF59E0B)
-            else -> Color(0xFF10B981)
+            telemetry.isDanger -> EKRobotColor.Status.Danger
+            telemetry.isWarning -> EKRobotColor.Status.Warning
+            else -> EKRobotColor.Status.Success
         }
 
         LinearProgressIndicator(

@@ -1,5 +1,7 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.domain.model
 
+import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
+
 enum class WheelDirection(val symbol: String) {
     FORWARD("▲"),
     BACKWARD("▼"),
@@ -132,16 +134,16 @@ data class RobotTelemetry(
 
 
     val i2cRegisters: List<I2CRegisterEntry> get() = listOf(
-        I2CRegisterEntry("0x01", "REG_FRONT_DIST", if (frontDistance > 0) "$frontDistance cm" else "--", "Ön ultrasonik engel mesafesi"),
-        I2CRegisterEntry("0x02", "REG_SERVO_ANGLE", "$servoAngle°", "SG90 radar tarama açısı (0-180°)"),
-        I2CRegisterEntry("0x03", "REG_ROBOT_STATE", "0x0${state.code} (${state.name})", "Otonom / Manuel durum kodu"),
-        I2CRegisterEntry("0x04", "REG_LEFT_DIST", if (leftDistance > 0) "$leftDistance cm" else "--", "Sol koridor tarama mesafesi"),
-        I2CRegisterEntry("0x05", "REG_RIGHT_DIST", if (rightDistance > 0) "$rightDistance cm" else "--", "Sağ koridor tarama mesafesi"),
-        I2CRegisterEntry("0x06", "REG_BATTERY_VOLT", "${(batteryVoltage * 1000).toInt()} mV (${batteryVoltage}V)", "2S Li-Ion analog okunan voltaj"),
-        I2CRegisterEntry("0x07", "REG_BATTERY_PCT", "%$batteryPercentage", "Hesaplanan Şarj Durumu (% SOC)"),
-        I2CRegisterEntry("0x08", "REG_CHARGING_STATE", if (isCharging) "0x01 (Şarjda)" else "0x00 (Kullanımda)", "Şarj cihazı algılama bayrağı"),
-        I2CRegisterEntry("0x10", "REG_COMMAND", manualDriveCommand, "Aktif sürüş yön komutu"),
-        I2CRegisterEntry("0xFF", "REG_FULL_TELEMETRY", "10B (CRC-8 OK)", "Tüm telemetri çerçeve dökümü")
+        I2CRegisterEntry("0x01", "REG_FRONT_DIST", if (frontDistance > 0) "$frontDistance cm" else "--", Strings.regFrontDistDesc),
+        I2CRegisterEntry("0x02", "REG_SERVO_ANGLE", "$servoAngle°", Strings.regServoAngleDesc),
+        I2CRegisterEntry("0x03", "REG_ROBOT_STATE", "0x0${state.code} (${state.name})", if (Strings.isTurkish()) "Otonom / Manuel durum kodu" else "Autonomous / Manual state code"),
+        I2CRegisterEntry("0x04", "REG_LEFT_DIST", if (leftDistance > 0) "$leftDistance cm" else "--", Strings.regLeftDistDesc),
+        I2CRegisterEntry("0x05", "REG_RIGHT_DIST", if (rightDistance > 0) "$rightDistance cm" else "--", Strings.regRightDistDesc),
+        I2CRegisterEntry("0x06", "REG_BATTERY_VOLT", "${(batteryVoltage * 1000).toInt()} mV (${batteryVoltage}V)", if (Strings.isTurkish()) "2S Li-Ion analog okunan voltaj" else "2S Li-Ion analog read voltage"),
+        I2CRegisterEntry("0x07", "REG_BATTERY_PCT", "%$batteryPercentage", Strings.regBatterySocDesc),
+        I2CRegisterEntry("0x08", "REG_CHARGING_STATE", if (isCharging) Strings.regChargingCharging else Strings.regChargingDischarging, Strings.regChargingDesc),
+        I2CRegisterEntry("0x10", "REG_COMMAND", manualDriveCommand, Strings.regCommandDesc),
+        I2CRegisterEntry("0xFF", "REG_FULL_TELEMETRY", "10B (CRC-8 OK)", Strings.regFullDesc)
     )
 
     companion object {

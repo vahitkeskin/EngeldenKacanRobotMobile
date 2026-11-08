@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -36,6 +37,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.domain.repository.ITelemetryRepo
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.LanguageMode
 import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -71,10 +73,9 @@ fun DashboardScreen(
 
     fun scrollToI2CCardTop() {
         coroutineScope.launch {
-            val desiredGapPx = with(density) { 10.dp.toPx() }
             // 1. Frame senkronizasyonu için kısa bir gecikme ver (AnimatedVisibility genişleme başlangıcı)
             delay(50)
-            val delta1 = cardScreenY - (containerScreenY + desiredGapPx)
+            val delta1 = cardScreenY - containerScreenY
             val target1 = (scrollState.value + delta1).toInt().coerceAtLeast(0)
             scrollState.animateScrollTo(
                 value = target1,
@@ -82,7 +83,7 @@ fun DashboardScreen(
             )
             // 2. Genişleme animasyonu tamamlandığında pixel-perfect hassas hizalama
             delay(120)
-            val delta2 = cardScreenY - (containerScreenY + desiredGapPx)
+            val delta2 = cardScreenY - containerScreenY
             if (kotlin.math.abs(delta2) > 2f) {
                 val target2 = (scrollState.value + delta2).toInt().coerceAtLeast(0)
                 scrollState.animateScrollTo(
@@ -100,19 +101,26 @@ fun DashboardScreen(
             .background(colors.bgPrimary)
     ) {
         // 2. İÇERİK ALANI (Dikey Scroll Edilebilir, Status Bar Altında ve BNV Üstünde)
-        Column(
+        // Kullanıcı İsteği: I2C kartı açıldığında üst mesafe tam 10.dp olsun ve HC-SR04 kartının en alt çizgisi asla görünmesin
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(bottom = 80.dp)  // BNV için güvenli alan
-                .imePadding()
+                .padding(top = 10.dp) // Status bar ile I2C kartı arasındaki mesafe tam 10.dp (HC-SR04 ile arasındaki 10.dp ile birebir aynı)
+                .clipToBounds()      // HC-SR04 kartının en alt çizgisinin taşmasını kesin olarak engeller
                 .onGloballyPositioned { coordinates ->
                     containerScreenY = coordinates.positionInWindow().y
                 }
-                .verticalScroll(scrollState)
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 96.dp)  // BNV için en az 16.dp üzerinde güvenli alan
+                    .imePadding()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
             // BAŞLIK & DURUM ROZETİ KARTI (BATARYA ROZETİ ENTEGRELİ)
             HeaderCard(
                 telemetry = telemetry,
@@ -185,8 +193,8 @@ fun DashboardScreen(
                     letterSpacing = 0.5.sp
                 )
                 Text(
-                    text = if (telemetry.hasSignal) "● CANLI AKIŞ" else "○ BEKLEMEDE",
-                    color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
+                    text = if (telemetry.hasSignal) "● ${Strings.statusLiveStream}" else "○ ${Strings.statusStandby}",
+                    color = if (telemetry.hasSignal) EKRobotColor.Status.Success else colors.textMuted,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -208,7 +216,7 @@ fun DashboardScreen(
                     if (logs.isEmpty()) {
                         item {
                             Text(
-                                text = if (telemetry.hasSignal) "> Telemetri akışı bekleniyor..." else "> ${Strings.noSignal}",
+                                text = if (telemetry.hasSignal) Strings.waitingTelemetryStream else "> ${Strings.noSignal}",
                                 color = colors.textMuted,
                                 fontSize = 10.sp,
                                 fontFamily = FontFamily.Monospace
@@ -230,6 +238,7 @@ fun DashboardScreen(
 
             // Alt kenar boşluğu
             Spacer(modifier = Modifier.height(12.dp))
+        }
         }
     }
 }
@@ -258,7 +267,7 @@ private fun HardwareConnectionButton(
         contentPadding = PaddingValues(0.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isConnected) Color(0xFFDC2626) else Color(0xFF2563EB)
+            containerColor = if (isConnected) EKRobotColor.Status.DangerDark else EKRobotColor.Brand.BluePrimary
         )
     ) {
         Text(

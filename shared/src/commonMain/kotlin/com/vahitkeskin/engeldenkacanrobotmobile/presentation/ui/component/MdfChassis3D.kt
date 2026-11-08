@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,9 +21,9 @@ object MdfChassis3D {
     fun build(polygons: ArrayList<Polygon3D>) {
         val yTop = -3f
         val yBottom = 3f
-        val mdfTopColor = Color(0xFFD4A373)
-        val mdfBottomColor = Color(0xFFB08958)
-        val mdfEdgeColor = Color(0xFF8B5A2B)
+        val mdfTopColor = EKRobotColor.Robot3D.MdfTop
+        val mdfBottomColor = EKRobotColor.Robot3D.MdfBottom
+        val mdfEdgeColor = EKRobotColor.Robot3D.MdfEdge
 
         // Şasiyi 5 yerel bölüme (Bands) ayırarak hem poligon boyut farkından kaynaklanan
         // derinlik sıralama hatalarını engelliyoruz, hem de alttan bakışta üstteki parçaların
@@ -198,7 +199,7 @@ object MdfChassis3D {
         )
 
         // Şasi Üzerindeki Montaj Vidaları
-        val screwColor = Color(0xFFCBD5E1)
+        val screwColor = EKRobotColor.Theme.Dark.TextSecondary
         val screwPositions = listOf(
             Vector3D(-20f, yTop - 0.6f, -85f),
             Vector3D(20f, yTop - 0.6f, -85f),

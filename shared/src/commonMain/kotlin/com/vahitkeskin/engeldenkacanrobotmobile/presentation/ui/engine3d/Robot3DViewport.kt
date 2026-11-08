@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.engine3d
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -7,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -196,68 +199,73 @@ fun Robot3DViewport(
         }
     }
 
-    // 🎨 2D/3D ÇİZİM MOTORU (Senkron, sıfır takılmalı ve katmanlı derinlik sıralamalı)
+    // 🎨 2D/3D ÇİZİM MOTORU (Senkron, sıfır takılmalı, katmanlı derinlik sıralamalı ve kesin sınır kırpmalı)
     Canvas(
         modifier = modifier
             .fillMaxSize()
+            .clipToBounds()
             .then(gestureModifier)
     ) {
         val width = size.width
         val height = size.height
         if (width <= 10f || height <= 10f) return@Canvas
 
-        // 1. 3D Model Geometrisini İnşa Et
-        val polygons = Robot3DModelBuilder.buildRobotModel(
-            telemetry = telemetry,
-            leftWheelPhase = leftWheelAngle,
-            rightWheelPhase = rightWheelAngle,
-            sonarWavePhase = sonarWavePhase,
-            isDark = isDark,
-            cameraPitch = camera.pitch
-        )
+        // Skia RenderNode seviyesinde çizimi kesinlikle Canvas sınırları içine hapseder (Komşu ekranlara taşmayı %100 bloke eder)
+        clipRect(left = 0f, top = 0f, right = width, bottom = height) {
+            // 1. 3D Model Geometrisini İnşa Et (Pitch & Yaw duyarlı fiziksel katmanlama ve örtme)
+            val polygons = Robot3DModelBuilder.buildRobotModel(
+                telemetry = telemetry,
+                leftWheelPhase = leftWheelAngle,
+                rightWheelPhase = rightWheelAngle,
+                sonarWavePhase = sonarWavePhase,
+                isDark = isDark,
+                cameraPitch = camera.pitch,
+                cameraYaw = camera.yaw
+            )
 
-        // 2. Katmanlı Derinlik Sıralaması (Layered Depth Sorting) ile 2D Ekrana İzdüşür
-        val projectedPolygons = camera.project(
-            polygons = polygons,
-            screenWidth = width,
-            screenHeight = height
-        )
+            // 2. Katmanlı Derinlik Sıralaması (Layered Depth Sorting) ile 2D Ekrana İzdüşür
+            val projectedPolygons = camera.project(
+                polygons = polygons,
+                screenWidth = width,
+                screenHeight = height
+            )
 
-        // 3. Poligonları ve Çizgileri Çiz
-        val path = Path()
-        for (poly in projectedPolygons) {
-            val pts = poly.points
-            if (pts.size < 2) continue
+            // 3. Poligonları ve Çizgileri Çiz
+            val path = Path()
+            for (poly in projectedPolygons) {
+                val pts = poly.points
+                if (pts.size < 2) continue
 
-            // 1. İki noktalı 3D Çizgi Segmenti (Izgara, Cetvel, Ticks, A3 İşareti)
-            if (pts.size == 2) {
-                drawLine(
-                    color = poly.strokeColor ?: poly.color,
-                    start = pts[0],
-                    end = pts[1],
-                    strokeWidth = if (poly.strokeWidth > 0f) poly.strokeWidth else 1.2f
-                )
-                continue
-            }
+                // 1. İki noktalı 3D Çizgi Segmenti (Izgara, Cetvel, Ticks, A3 İşareti)
+                if (pts.size == 2) {
+                    drawLine(
+                        color = poly.strokeColor ?: poly.color,
+                        start = pts[0],
+                        end = pts[1],
+                        strokeWidth = if (poly.strokeWidth > 0f) poly.strokeWidth else 1.2f
+                    )
+                    continue
+                }
 
-            // 2. Çokgen Yüzey (Poligon Dolgusu ve Sınır Çizgisi)
-            path.reset()
-            path.moveTo(pts[0].x, pts[0].y)
-            for (i in 1 until pts.size) {
-                path.lineTo(pts[i].x, pts[i].y)
-            }
-            path.close()
+                // 2. Çokgen Yüzey (Poligon Dolgusu ve Sınır Çizgisi)
+                path.reset()
+                path.moveTo(pts[0].x, pts[0].y)
+                for (i in 1 until pts.size) {
+                    path.lineTo(pts[i].x, pts[i].y)
+                }
+                path.close()
 
-            // Poligon Dolgusu (Saydamlık / Alpha destekler)
-            drawPath(path = path, color = poly.color)
+                // Poligon Dolgusu (Saydamlık / Alpha destekler)
+                drawPath(path = path, color = poly.color)
 
-            // Varsa Kenar Çizgisi
-            if (poly.strokeColor != null && poly.strokeWidth > 0f) {
-                drawPath(
-                    path = path,
-                    color = poly.strokeColor,
-                    style = Stroke(width = poly.strokeWidth)
-                )
+                // Varsa Kenar Çizgisi
+                if (poly.strokeColor != null && poly.strokeWidth > 0f) {
+                    drawPath(
+                        path = path,
+                        color = poly.strokeColor,
+                        style = Stroke(width = poly.strokeWidth)
+                    )
+                }
             }
         }
     }
@@ -278,7 +286,7 @@ private fun Robot3DViewportPreview() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0B1120))
+            .background(EKRobotColor.Alpha.NightDeepest)
             .padding(bottom = 80.dp) // BNV üstünde kalacak şekilde güvenli alan
     ) {
         Robot3DViewport(

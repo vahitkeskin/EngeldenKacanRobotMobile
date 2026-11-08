@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,15 +19,15 @@ import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.engine3d.Polygon
 object UndersideMotors3D {
 
     fun build(polygons: ArrayList<Polygon3D>) {
-        val yellowMotorColor = Color(0xFFF59E0B) // Sarı plastik TT dişli kutusu
-        val yellowTabColor = Color(0xFFD97706)
-        val steelMotorColor = Color(0xFF94A3B8)  // Çelik 130 DC motor silindiri
-        val endCapColor = Color(0xFF334155)     // Arka plastik kapak
-        val lugBrassColor = Color(0xFFD97706)   // Pirinç lehim terminali
-        val whiteShaftColor = Color(0xFFF8FAFC) // Beyaz aks D-şaft
-        val redWireColor = Color(0xFFDC2626)
-        val blackWireColor = Color(0xFF0F172A)
-        val boltColor = Color(0xFFCBD5E1)
+        val yellowMotorColor = EKRobotColor.Status.Warning // Sarı plastik TT dişli kutusu
+        val yellowTabColor = EKRobotColor.Status.WarningDark
+        val steelMotorColor = EKRobotColor.Theme.Dark.TextMuted  // Çelik 130 DC motor silindiri
+        val endCapColor = EKRobotColor.Theme.Dark.Border     // Arka plastik kapak
+        val lugBrassColor = EKRobotColor.Status.WarningDark   // Pirinç lehim terminali
+        val whiteShaftColor = EKRobotColor.Theme.Dark.TextPrimary // Beyaz aks D-şaft
+        val redWireColor = EKRobotColor.Status.DangerDark
+        val blackWireColor = EKRobotColor.Theme.Dark.BgPrimary
+        val boltColor = EKRobotColor.Theme.Dark.TextSecondary
 
         // SOL TT MOTOR (X = -46f)
         // 1. Sarı Plastik Dişli Kutusu Gövdesi
@@ -69,7 +70,7 @@ object UndersideMotors3D {
         add3DBox(polygons, cx = 46f, cy = 2f, cz = -8f, width = 2.5f, height = 6f, depth = 2.5f, color = boltColor, renderLayer = 1)
 
         // Ön Alt Şasiden Sarkan Şeffaf Mavi SG90 Servo Alt Tabanı
-        add3DBox(polygons, cx = 0f, cy = 8f, cz = -105f, width = 20f, height = 8f, depth = 12f, color = Color(0xEE1E40AF), renderLayer = 1)
+        add3DBox(polygons, cx = 0f, cy = 8f, cz = -105f, width = 20f, height = 8f, depth = 12f, color = EKRobotColor.Alpha.BlueGlass, renderLayer = 1)
     }
 
     fun buildStandalone(): List<Polygon3D> {

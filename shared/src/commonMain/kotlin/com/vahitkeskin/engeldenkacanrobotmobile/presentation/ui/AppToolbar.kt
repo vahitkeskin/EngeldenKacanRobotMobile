@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -44,10 +45,10 @@ fun HeaderBatteryPill(
 ) {
     val pct = batteryPercentage.coerceIn(0, 100)
     val batColor = when {
-        isCharging -> Color(0xFF10B981) // Yeşil (Şarj Oluyor)
-        pct <= 15 -> Color(0xFFEF4444)  // Kritik Kırmızı
-        pct <= 35 -> Color(0xFFF59E0B)  // Uyarı Sarı
-        else -> Color(0xFF10B981)       // Güvenli Yeşil
+        isCharging -> EKRobotColor.Status.Success // Yeşil (Şarj Oluyor)
+        pct <= 15 -> EKRobotColor.Status.Danger  // Kritik Kırmızı
+        pct <= 35 -> EKRobotColor.Status.Warning  // Uyarı Sarı
+        else -> EKRobotColor.Status.Success       // Güvenli Yeşil
     }
 
     Box(
@@ -145,8 +146,8 @@ fun HeaderStatusBadge(
         }
     }
 
-    val badgeColor = if (telemetryHasSignal) robotState.badgeColor else Color(0xFFEF4444)
-    val dotColor = if (telemetryHasSignal) Color(0xFF10B981) else Color(0xFFEF4444)
+    val badgeColor = if (telemetryHasSignal) robotState.badgeColor else EKRobotColor.Status.Danger
+    val dotColor = if (telemetryHasSignal) EKRobotColor.Status.Success else EKRobotColor.Status.Danger
 
     Box(
         modifier = modifier
@@ -206,7 +207,7 @@ fun DashboardHeaderCard(
                 modifier = Modifier
                     .size(9.dp)
                     .clip(CircleShape)
-                    .background(if (telemetry.hasSignal) Color(0xFF10B981) else Color(0xFFEF4444))
+                    .background(if (telemetry.hasSignal) EKRobotColor.Status.Success else EKRobotColor.Status.Danger)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
@@ -299,7 +300,7 @@ fun Robot3DHeaderCard(
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(if (telemetry.hasSignal) Color(0xFF10B981) else Color(0xFFEF4444))
+                    .background(if (telemetry.hasSignal) EKRobotColor.Status.Success else EKRobotColor.Status.Danger)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Column {
@@ -370,7 +371,7 @@ fun ControllerHeaderCard(
                 modifier = Modifier
                     .size(9.dp)
                     .clip(CircleShape)
-                    .background(if (isConnected) Color(0xFF10B981) else Color(0xFFEF4444))
+                    .background(if (isConnected) EKRobotColor.Status.Success else EKRobotColor.Status.Danger)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
@@ -408,7 +409,7 @@ fun ControllerHeaderCard(
             Button(
                 onClick = onEmergencyBrake,
                 shape = RoundedCornerShape(7.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+                colors = ButtonDefaults.buttonColors(containerColor = EKRobotColor.Status.DangerDark),
                 contentPadding = PaddingValues(horizontal = 9.dp, vertical = 4.dp),
                 modifier = Modifier.height(28.dp)
             ) {
@@ -440,7 +441,7 @@ private fun AppToolbarPreview() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF0B1120))
+            .background(EKRobotColor.Alpha.NightDeepest)
             .padding(16.dp)
             .padding(bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)

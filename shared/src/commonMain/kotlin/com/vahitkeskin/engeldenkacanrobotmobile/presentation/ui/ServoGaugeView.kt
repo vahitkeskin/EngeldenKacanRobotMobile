@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -59,9 +60,9 @@ fun ServoGaugeView(
 
         val angleColor = when {
             !telemetry.hasSignal -> colors.textMuted
-            telemetry.servoAngle in 80..100 -> Color(0xFF10B981) // Merkez (Zümrüt Yeşil)
-            telemetry.servoAngle < 80 -> Color(0xFF38BDF8)       // Sağ (Açık Mavi)
-            else -> Color(0xFFA855F7)                            // Sol (Mor)
+            telemetry.servoAngle in 80..100 -> EKRobotColor.Status.Success // Merkez (Zümrüt Yeşil)
+            telemetry.servoAngle < 80 -> EKRobotColor.Brand.SkyLight       // Sağ (Açık Mavi)
+            else -> EKRobotColor.Brand.Violet                            // Sol (Mor)
         }
 
         Box(
@@ -214,7 +215,7 @@ fun ServoGaugeView(
                     )
                     Text(
                         text = "[${Strings.noSignal.uppercase()}]",
-                        color = Color(0xFFEF4444),
+                        color = EKRobotColor.Status.Danger,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1

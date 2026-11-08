@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,12 +39,12 @@ object CuttingMat3D {
         val a3BoxAlpha = if (isLookingFromBelow) 0.40f else 0.80f
 
         // Fotoğraftaki gerçek A3 kesme matı yeşili
-        val matGreen = (if (isDark) Color(0xFF0F5132) else Color(0xFF15803D)).copy(alpha = surfaceAlpha)
-        val matRimGreen = (if (isDark) Color(0xFF0A3622) else Color(0xFF166534)).copy(alpha = rimAlpha)
-        val borderWhite = (if (isDark) Color(0xFFF0FDF4) else Color(0xFFFFFFFF)).copy(alpha = rulerAlpha)
-        val majorGridColor = (if (isDark) Color(0xFFD1FAE5) else Color(0xFFECFDF5)).copy(alpha = majorGridAlpha)
-        val minorGridColor = (if (isDark) Color(0xFF6EE7B7) else Color(0xFF86EFAC)).copy(alpha = minorGridAlpha)
-        val a3BoxColor = (if (isDark) Color(0xFF6EE7B7) else Color(0xFF86EFAC)).copy(alpha = a3BoxAlpha)
+        val matGreen = (if (isDark) EKRobotColor.CuttingMat.MatGreenDark else EKRobotColor.CuttingMat.MatGreenLight).copy(alpha = surfaceAlpha)
+        val matRimGreen = (if (isDark) EKRobotColor.CuttingMat.MatRimDark else EKRobotColor.CuttingMat.MatRimLight).copy(alpha = rimAlpha)
+        val borderWhite = (if (isDark) EKRobotColor.CuttingMat.RulerWhite else Color.White).copy(alpha = rulerAlpha)
+        val majorGridColor = (if (isDark) EKRobotColor.CuttingMat.GridDarkMajor else EKRobotColor.CuttingMat.GridLightMajor).copy(alpha = majorGridAlpha)
+        val minorGridColor = (if (isDark) EKRobotColor.Theme.Dark.LogText else EKRobotColor.CuttingMat.GridLightMinor).copy(alpha = minorGridAlpha)
+        val a3BoxColor = (if (isDark) EKRobotColor.Theme.Dark.LogText else EKRobotColor.CuttingMat.GridLightMinor).copy(alpha = a3BoxAlpha)
 
         // A3 Ölçüleri: 45 cm genişlik (X) x 30 cm derinlik (Z) -> 450f x 300f
         val matWidth = 450f
@@ -57,23 +58,17 @@ object CuttingMat3D {
         val minZ = centerZ - halfD // -160f
         val maxZ = centerZ + halfD // +140f
 
-        val cornerR = 14f // Kavisli köşe yarıçapı (~1.4 cm)
-
         // ==========================================
-        // 1. A3 MAT TABAN YÜZEYİ (Kavisli 4 Köşe - Layer -1)
+        // 1. A3 MAT TABAN YÜZEYİ (Sivri / Keskin 4 Köşe - Layer -1)
         // ==========================================
-        // 8 köşeli yuvarlatılmış poligon: Mat yüzeyi ilk çizilir, asla çizgileri örtmez!
+        // Tam 45cm x 30cm keskin ve sivri 4 köşeli A3 mat tablası (Layer -1)
         polygons.add(
             Polygon3D(
                 vertices = listOf(
-                    Vector3D(minX + cornerR, ySurface, minZ),
-                    Vector3D(maxX - cornerR, ySurface, minZ),
-                    Vector3D(maxX, ySurface, minZ + cornerR),
-                    Vector3D(maxX, ySurface, maxZ - cornerR),
-                    Vector3D(maxX - cornerR, ySurface, maxZ),
-                    Vector3D(minX + cornerR, ySurface, maxZ),
-                    Vector3D(minX, ySurface, maxZ - cornerR),
-                    Vector3D(minX, ySurface, minZ + cornerR)
+                    Vector3D(minX, ySurface, minZ),
+                    Vector3D(maxX, ySurface, minZ),
+                    Vector3D(maxX, ySurface, maxZ),
+                    Vector3D(minX, ySurface, maxZ)
                 ),
                 color = matGreen,
                 strokeColor = matRimGreen,

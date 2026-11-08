@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.component
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -33,7 +34,7 @@ fun Part3DPreviewBox(
     subtitle: String,
     polygons: List<Polygon3D>,
     modifier: Modifier = Modifier.size(340.dp),
-    backgroundColor: Color = Color(0xFF0F172A),
+    backgroundColor: Color = EKRobotColor.Theme.Dark.BgPrimary,
     yaw: Float = -35f,
     pitch: Float = 26f,
     zoom: Float = 2.4f,
@@ -76,7 +77,7 @@ fun Part3DPreviewBox(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
-            .border(1.dp, Color(0xFF334155), RoundedCornerShape(16.dp))
+            .border(1.dp, EKRobotColor.Theme.Dark.Border, RoundedCornerShape(16.dp))
     ) {
         // 3D Canvas
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -109,7 +110,7 @@ fun Part3DPreviewBox(
                 .align(Alignment.TopStart)
                 .padding(12.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xCC1E293B))
+                .background(EKRobotColor.Alpha.SlateGlassMedium)
                 .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
             Text(
@@ -120,7 +121,7 @@ fun Part3DPreviewBox(
             )
             Text(
                 text = subtitle,
-                color = Color(0xFF94A3B8),
+                color = EKRobotColor.Theme.Dark.TextMuted,
                 fontSize = 10.sp
             )
         }
@@ -131,12 +132,12 @@ fun Part3DPreviewBox(
                 .align(Alignment.BottomEnd)
                 .padding(12.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Color(0x990F172A))
+                .background(EKRobotColor.Alpha.SlateGlassLight)
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Text(
                 text = "${polygons.size} Poly",
-                color = Color(0xFF38BDF8),
+                color = EKRobotColor.Brand.SkyLight,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium
             )

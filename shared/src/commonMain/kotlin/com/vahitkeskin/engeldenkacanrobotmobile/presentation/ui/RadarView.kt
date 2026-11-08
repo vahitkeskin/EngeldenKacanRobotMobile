@@ -1,4 +1,5 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
+import com.vahitkeskin.engeldenkacanrobotmobile.theme.EKRobotColor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -91,14 +92,14 @@ fun RadarView(
                     val by = cy - (maxRadius * sin(beamRad)).toFloat()
 
                     drawLine(
-                        color = Color(0x3310B981),
+                        color = EKRobotColor.Alpha.GreenGlass,
                         start = Offset(cx, cy),
                         end = Offset(bx, by),
                         strokeWidth = 8f,
                         cap = StrokeCap.Round
                     )
                     drawLine(
-                        color = Color(0xFF34D399),
+                        color = EKRobotColor.Status.SuccessLight,
                         start = Offset(cx, cy),
                         end = Offset(bx, by),
                         strokeWidth = 2.5f,
@@ -111,14 +112,14 @@ fun RadarView(
                         val obsX = cx + (rNorm * cos(beamRad)).toFloat()
                         val obsY = cy - (rNorm * sin(beamRad)).toFloat()
 
-                        drawCircle(color = Color(0xFFEF4444), radius = 5f, center = Offset(obsX, obsY))
-                        drawCircle(color = Color(0xFFFECACA), radius = 2.5f, center = Offset(obsX, obsY))
+                        drawCircle(color = EKRobotColor.Status.Danger, radius = 5f, center = Offset(obsX, obsY))
+                        drawCircle(color = EKRobotColor.Status.DangerLight, radius = 2.5f, center = Offset(obsX, obsY))
                     }
                 }
 
                 // Merkez Noktası
                 drawCircle(
-                    color = if (telemetry.hasSignal) Color(0xFF10B981) else colors.textMuted,
+                    color = if (telemetry.hasSignal) EKRobotColor.Status.Success else colors.textMuted,
                     radius = 6f,
                     center = Offset(cx, cy)
                 )
@@ -128,7 +129,7 @@ fun RadarView(
             if (!telemetry.hasSignal) {
                 Text(
                     text = "[${Strings.noSignal.uppercase()}]",
-                    color = Color(0xFFEF4444),
+                    color = EKRobotColor.Status.Danger,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
