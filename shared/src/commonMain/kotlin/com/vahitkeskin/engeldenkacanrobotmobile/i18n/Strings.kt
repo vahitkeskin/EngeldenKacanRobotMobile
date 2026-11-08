@@ -1,11 +1,15 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.i18n
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 enum class LanguageMode {
     SYSTEM, TR, EN
 }
 
 object Strings {
-    var currentLanguage: LanguageMode = LanguageMode.SYSTEM
+    var currentLanguage: LanguageMode by mutableStateOf(LanguageMode.SYSTEM)
 
     fun isTurkish(): Boolean {
         return when (currentLanguage) {
@@ -45,6 +49,23 @@ object Strings {
     val navTelemetry: String get() = if (isTurkish()) "Telemetri" else "Telemetry"
     val navController: String get() = if (isTurkish()) "Kumanda" else "Remote"
     val navRobotTwin: String get() = if (isTurkish()) "Robot 3D" else "Robot 3D"
+    val navSettings: String get() = if (isTurkish()) "Ayarlar" else "Settings"
+
+    // Ayarlar Ekranı (Settings Screen)
+    val settingsTitle: String get() = if (isTurkish()) "AYARLAR" else "SETTINGS"
+    val settingsSubtitle: String get() = if (isTurkish()) "Tema, Dil & Sistem Tercihleri" else "Theme, Language & System Preferences"
+    val sectionAppearance: String get() = if (isTurkish()) "GÖRÜNÜM & TEMA" else "APPEARANCE & THEME"
+    val appearanceDesc: String get() = if (isTurkish()) "Arayüz rengini cihazınıza veya kişisel zevkinize göre ayarlayın" else "Customize interface colors to match your device or preference"
+    val sectionLanguage: String get() = if (isTurkish()) "DİL SEÇİMİ" else "LANGUAGE PREFERENCE"
+    val languageDesc: String get() = if (isTurkish()) "Tüm etiket ve telemetri metinleri anında seçilen dile geçer" else "All labels and telemetry texts instantly update to chosen language"
+    val sectionHardwareInfo: String get() = if (isTurkish()) "DONANIM & VERİYOLU" else "HARDWARE & BUS"
+    val sectionAppInfo: String get() = if (isTurkish()) "UYGULAMA HAKKINDA" else "ABOUT APPLICATION"
+    val optSystemDesc: String get() = if (isTurkish()) "Cihazınızın sistem ayarlarıyla otomatik senkronize olur" else "Automatically synchronizes with your device settings"
+    val optDarkDesc: String get() = if (isTurkish()) "Göz yormayan, OLED dostu derin lacivert/siyah renkler" else "Eye-friendly, OLED-optimized deep navy/black tones"
+    val optLightDesc: String get() = if (isTurkish()) "Güneş altında yüksek okunabilirlik sunan aydınlık arayüz" else "Bright high-contrast interface for daylight reading"
+    val optTrDesc: String get() = "Türkçe (Varsayılan)"
+    val optEnDesc: String get() = "English (International)"
+    val optLangAutoDesc: String get() = if (isTurkish()) "Cihazın sistem diline göre belirlenir" else "Determined by device system language"
 
     // Robot İkiz Ekranı
     val robotTwinTitle: String get() = if (isTurkish()) "ROBOT 3D DİJİTAL İKİZ" else "ROBOT 3D DIGITAL TWIN"

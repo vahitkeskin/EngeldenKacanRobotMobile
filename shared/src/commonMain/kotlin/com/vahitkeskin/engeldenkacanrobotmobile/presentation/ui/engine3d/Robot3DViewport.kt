@@ -223,12 +223,24 @@ fun Robot3DViewport(
             screenHeight = height
         )
 
-        // 3. Poligonları Çiz
+        // 3. Poligonları ve Çizgileri Çiz
         val path = Path()
         for (poly in projectedPolygons) {
             val pts = poly.points
-            if (pts.size < 3) continue
+            if (pts.size < 2) continue
 
+            // 1. İki noktalı 3D Çizgi Segmenti (Izgara, Cetvel, Ticks, A3 İşareti)
+            if (pts.size == 2) {
+                drawLine(
+                    color = poly.strokeColor ?: poly.color,
+                    start = pts[0],
+                    end = pts[1],
+                    strokeWidth = if (poly.strokeWidth > 0f) poly.strokeWidth else 1.2f
+                )
+                continue
+            }
+
+            // 2. Çokgen Yüzey (Poligon Dolgusu ve Sınır Çizgisi)
             path.reset()
             path.moveTo(pts[0].x, pts[0].y)
             for (i in 1 until pts.size) {

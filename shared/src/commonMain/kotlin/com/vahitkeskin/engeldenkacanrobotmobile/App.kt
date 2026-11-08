@@ -29,6 +29,7 @@ import com.vahitkeskin.engeldenkacanrobotmobile.i18n.Strings
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.DashboardScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.Robot3DScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.RobotControllerScreen
+import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.SettingsScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui.SplashScreen
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.AppColors
 import com.vahitkeskin.engeldenkacanrobotmobile.theme.ThemeMode
@@ -44,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
  * Tab 0: 📊 Telemetri (DashboardScreen)      - Radar, HC-SR04, Batarya Yönetimi ve Anasayfa Hızlı Müdahale
  * Tab 1: 🎮 Kumanda (RobotControllerScreen)  - Tam Sanal Kokpit, D-Pad Direksiyon, Servo Kadranı, Vitesler
  * Tab 2: 🤖 Robot 3D (Robot3DScreen)        - Tam ekranı kaplayan, iki parmakla zoom/çevirme destekli 3D Dijital İkiz
+ * Tab 3: ⚙️ Ayarlar (SettingsScreen)        - Tema (Sistem/Koyu/Açık), Dil Tercihleri ve Donanım/Sistem Bilgileri
  */
 @Composable
 fun App() {
@@ -63,8 +65,8 @@ fun App() {
     SetSystemBarsTheme(isDark = isDark)
     Strings.currentLanguage = languageMode
 
-    // EKRANLAR ARASI KAYDIRMA (HorizontalPager Swipe) - 3 SEKMELİ YAPI
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
+    // EKRANLAR ARASI KAYDIRMA (HorizontalPager Swipe) - 4 SEKMELİ YAPI
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
     // 3D Etkileşim Kilidi: 3D aktifken HorizontalPager kaydırma KESİNLİKLE engellenir
     var is3dActive by remember { mutableStateOf(false) }
@@ -105,9 +107,7 @@ fun App() {
                             0 -> DashboardScreen(
                                 repository = repository,
                                 themeMode = themeMode,
-                                languageMode = languageMode,
-                                onThemeSelected = { themeMode = it },
-                                onLanguageSelected = { languageMode = it }
+                                languageMode = languageMode
                             )
                             1 -> RobotControllerScreen(
                                 repository = repository,
@@ -124,6 +124,11 @@ fun App() {
                                 onNavigateToTelemetry = {
                                     coroutineScope.launch { pagerState.animateScrollToPage(0) }
                                 },
+                                themeMode = themeMode,
+                                languageMode = languageMode
+                            )
+                            3 -> SettingsScreen(
+                                repository = repository,
                                 themeMode = themeMode,
                                 languageMode = languageMode,
                                 onThemeSelected = { themeMode = it },
@@ -142,6 +147,7 @@ fun App() {
                     ) {
                         BottomNavigationBar(
                             selectedTab = pagerState.currentPage,
+                            languageMode = languageMode,
                             onTabSelected = { tabIndex ->
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(tabIndex)
@@ -159,6 +165,7 @@ fun App() {
 @Composable
 private fun BottomNavigationBar(
     selectedTab: Int,
+    languageMode: LanguageMode,
     onTabSelected: (Int) -> Unit,
     colors: AppColors
 ) {
@@ -201,6 +208,16 @@ private fun BottomNavigationBar(
             colors = colors,
             modifier = Modifier.weight(1f),
             onClick = { onTabSelected(2) }
+        )
+
+        // TAB 4: AYARLAR (Settings)
+        BottomNavItem(
+            icon = "⚙️",
+            label = Strings.navSettings,
+            isSelected = selectedTab == 3,
+            colors = colors,
+            modifier = Modifier.weight(1f),
+            onClick = { onTabSelected(3) }
         )
     }
 }

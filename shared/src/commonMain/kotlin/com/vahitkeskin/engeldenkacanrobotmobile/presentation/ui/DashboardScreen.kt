@@ -1,5 +1,7 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,10 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.vahitkeskin.engeldenkacanrobotmobile.SetSystemBarsTheme
 import com.vahitkeskin.engeldenkacanrobotmobile.data.MockTelemetryRepository
 import com.vahitkeskin.engeldenkacanrobotmobile.domain.model.RobotState
@@ -36,9 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun DashboardScreen(
     repository: ITelemetryRepository = remember { MockTelemetryRepository() },
     themeMode: ThemeMode = ThemeMode.SYSTEM,
-    languageMode: LanguageMode = LanguageMode.SYSTEM,
-    onThemeSelected: (ThemeMode) -> Unit = {},
-    onLanguageSelected: (LanguageMode) -> Unit = {}
+    languageMode: LanguageMode = LanguageMode.SYSTEM
 ) {
     // Sistem teması ve seçilen modun çözümlenmesi
     val systemInDark = isSystemInDarkTheme()
@@ -58,6 +63,35 @@ fun DashboardScreen(
     val isConnected by repository.isConnected.collectAsState()
 
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
+
+    var containerScreenY by remember { mutableStateOf(0f) }
+    var cardScreenY by remember { mutableStateOf(0f) }
+
+    fun scrollToI2CCardTop() {
+        coroutineScope.launch {
+            val desiredGapPx = with(density) { 10.dp.toPx() }
+            // 1. Frame senkronizasyonu için kısa bir gecikme ver (AnimatedVisibility genişleme başlangıcı)
+            delay(50)
+            val delta1 = cardScreenY - (containerScreenY + desiredGapPx)
+            val target1 = (scrollState.value + delta1).toInt().coerceAtLeast(0)
+            scrollState.animateScrollTo(
+                value = target1,
+                animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing)
+            )
+            // 2. Genişleme animasyonu tamamlandığında pixel-perfect hassas hizalama
+            delay(120)
+            val delta2 = cardScreenY - (containerScreenY + desiredGapPx)
+            if (kotlin.math.abs(delta2) > 2f) {
+                val target2 = (scrollState.value + delta2).toInt().coerceAtLeast(0)
+                scrollState.animateScrollTo(
+                    value = target2,
+                    animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+                )
+            }
+        }
+    }
 
     // 1. TÜM EKRAN (Edge-to-Edge Arka Plan)
     Box(
@@ -72,6 +106,9 @@ fun DashboardScreen(
                 .statusBarsPadding()
                 .padding(bottom = 80.dp)  // BNV için güvenli alan
                 .imePadding()
+                .onGloballyPositioned { coordinates ->
+                    containerScreenY = coordinates.positionInWindow().y
+                }
                 .verticalScroll(scrollState)
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -82,14 +119,9 @@ fun DashboardScreen(
                 colors = colors
             )
 
-            // TEMA, DİL VE BAĞLANTI KONTROL BARI
-            ControlBar(
+            // DONANIMA BAĞLAN / BAĞLANTIYI KES BUTONU
+            HardwareConnectionButton(
                 isConnected = isConnected,
-                themeMode = themeMode,
-                languageMode = languageMode,
-                colors = colors,
-                onThemeSelected = onThemeSelected,
-                onLanguageSelected = onLanguageSelected,
                 onConnectToggle = {
                     if (isConnected) repository.disconnect() else repository.connect("/dev/cu.usbserial-1240")
                 }
@@ -127,10 +159,16 @@ fun DashboardScreen(
                 colors = colors
             )
 
-            // I2C VERİYOLU & AĞ BİLGİLERİ (Açılır / Kapanır UI)
+            // I2C VERİYOLU & AĞ BİLGİLERİ (Açılır / Kapanır UI & Otomatik En Üste Animasyonlu Kaydırma)
             I2CNetworkCard(
                 telemetry = telemetry,
-                colors = colors
+                colors = colors,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    cardScreenY = coordinates.positionInWindow().y
+                },
+                onScrollToTop = {
+                    scrollToI2CCardTop()
+                }
             )
 
             // TELEMETRİ GÜNLÜĞÜ (Kompakt ve Scroll Edilebilir Terminal)
@@ -208,180 +246,27 @@ private fun HeaderCard(
 }
 
 @Composable
-private fun ControlBar(
+private fun HardwareConnectionButton(
     isConnected: Boolean,
-    themeMode: ThemeMode,
-    languageMode: LanguageMode,
-    colors: AppColors,
-    onThemeSelected: (ThemeMode) -> Unit,
-    onLanguageSelected: (LanguageMode) -> Unit,
     onConnectToggle: () -> Unit
 ) {
-    Column(
+    Button(
+        onClick = onConnectToggle,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.bgSecondary)
-            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .height(38.dp),
+        contentPadding = PaddingValues(0.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isConnected) Color(0xFFDC2626) else Color(0xFF2563EB)
+        )
     ) {
-        // 1. TEMA SEÇİCİ
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = Strings.themeLabel,
-                color = colors.textMuted,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.width(42.dp)
-            )
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(30.dp)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(colors.bgPrimary)
-                    .border(0.8.dp, colors.border, RoundedCornerShape(7.dp))
-                    .padding(2.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                SegmentTab(
-                    icon = "💻",
-                    label = Strings.optSystem,
-                    isSelected = themeMode == ThemeMode.SYSTEM,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onThemeSelected(ThemeMode.SYSTEM) }
-                )
-                SegmentTab(
-                    icon = "🌙",
-                    label = Strings.optDark,
-                    isSelected = themeMode == ThemeMode.DARK,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onThemeSelected(ThemeMode.DARK) }
-                )
-                SegmentTab(
-                    icon = "☀️",
-                    label = Strings.optLight,
-                    isSelected = themeMode == ThemeMode.LIGHT,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onThemeSelected(ThemeMode.LIGHT) }
-                )
-            }
-        }
-
-        // 2. DİL SEÇİCİ
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = Strings.langLabel,
-                color = colors.textMuted,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.width(42.dp)
-            )
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(30.dp)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(colors.bgPrimary)
-                    .border(0.8.dp, colors.border, RoundedCornerShape(7.dp))
-                    .padding(2.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                SegmentTab(
-                    icon = "🌐",
-                    label = Strings.optLangAuto,
-                    isSelected = languageMode == LanguageMode.SYSTEM,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onLanguageSelected(LanguageMode.SYSTEM) }
-                )
-                SegmentTab(
-                    icon = "🇹🇷",
-                    label = Strings.optLangTr,
-                    isSelected = languageMode == LanguageMode.TR,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onLanguageSelected(LanguageMode.TR) }
-                )
-                SegmentTab(
-                    icon = "🇬🇧",
-                    label = Strings.optLangEn,
-                    isSelected = languageMode == LanguageMode.EN,
-                    colors = colors,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onLanguageSelected(LanguageMode.EN) }
-                )
-            }
-        }
-
-        // 3. BAĞLANTI BUTONU
-        Button(
-            onClick = onConnectToggle,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(36.dp),
-            contentPadding = PaddingValues(0.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isConnected) Color(0xFFDC2626) else Color(0xFF2563EB)
-            )
-        ) {
-            Text(
-                text = if (isConnected) "⚡ " + Strings.disconnect else "🔌 " + Strings.connect,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-    }
-}
-
-@Composable
-private fun SegmentTab(
-    icon: String,
-    label: String,
-    isSelected: Boolean,
-    colors: AppColors,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .clip(RoundedCornerShape(5.dp))
-            .background(if (isSelected) Color(0xFF2563EB) else Color.Transparent)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = icon,
-                fontSize = 10.sp,
-                modifier = Modifier.padding(end = 3.dp)
-            )
-            Text(
-                text = label,
-                fontSize = 10.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else colors.textMuted,
-                maxLines = 1
-            )
-        }
+        Text(
+            text = if (isConnected) "⚡ " + Strings.disconnect else "🔌 " + Strings.connect,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
     }
 }
 

@@ -1,7 +1,9 @@
 package com.vahitkeskin.engeldenkacanrobotmobile.presentation.ui
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 fun I2CNetworkCard(
     telemetry: RobotTelemetry,
     colors: AppColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onScrollToTop: (() -> Unit)? = null
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val arrowRotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f)
@@ -54,12 +57,17 @@ fun I2CNetworkCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             // ==========================================
-            // 1. TIKLANABİLİR BAŞLIK (AÇILIR / KAPANIR)
+            // 1. TIKLANABİLİR BAŞLIK (AÇILIR / KAPANIR & EN ÜSTE ANİMASYONLU HİZALAMA)
             // ==========================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded }
+                    .clickable {
+                        isExpanded = !isExpanded
+                        if (isExpanded) {
+                            onScrollToTop?.invoke()
+                        }
+                    }
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -165,8 +173,8 @@ fun I2CNetworkCard(
             // ==========================================
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+                enter = fadeIn(animationSpec = tween(250)) + expandVertically(animationSpec = tween(320, easing = FastOutSlowInEasing)),
+                exit = fadeOut(animationSpec = tween(200)) + shrinkVertically(animationSpec = tween(280, easing = FastOutSlowInEasing))
             ) {
                 Column(
                     modifier = Modifier
@@ -340,6 +348,28 @@ fun I2CNetworkCard(
                             colors = colors,
                             modifier = Modifier.weight(1f)
                         )
+                    }
+
+                    if (onScrollToTop != null) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(colors.bgPrimary)
+                                .border(0.6.dp, colors.border, RoundedCornerShape(6.dp))
+                                .clickable { onScrollToTop.invoke() }
+                                .padding(vertical = 7.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "▲ Ekranın Başına Hizala",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF0EA5E9),
+                                letterSpacing = 0.3.sp
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(2.dp))

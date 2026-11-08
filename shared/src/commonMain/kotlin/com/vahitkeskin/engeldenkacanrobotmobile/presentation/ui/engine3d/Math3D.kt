@@ -65,7 +65,7 @@ data class Polygon3D(
     val strokeColor: Color? = null,
     val strokeWidth: Float = 0f,
     val isDoubleSided: Boolean = true,
-    val renderLayer: Int = 1 // 0: Zemin Kesim Matı, 1: Katı Robot Modeli, 2: Saydam Sonar Işını
+    val renderLayer: Int = 1 // -1: Zemin Mat Plakası, 0: Zemin Izgara/Cetvel, 1: Katı Robot Modeli, 2: Saydam Sonar Işını
 ) {
     fun normal(): Vector3D {
         if (vertices.size < 3) return Vector3D(0f, 0f, 1f)
@@ -132,8 +132,37 @@ class Camera3D(
                 rot + pivot
             }
 
-            // Normal hesabı ve Lambertian gölgelendirme
+            // 1. İki noktalı 3D Çizgi Segmentleri (Kesme Matı Izgaraları, Cetvel, Ticks ve A3 İşaretleri)
+            if (transformedVerts.size == 2) {
+                val z0 = transformedVerts[0].z + cameraDistance
+                val z1 = transformedVerts[1].z + cameraDistance
+                if (z0 <= 2f && z1 <= 2f) continue
+
+                val safeZ0 = max(2f, z0)
+                val safeZ1 = max(2f, z1)
+                val scale0 = focalDistance / safeZ0
+                val scale1 = focalDistance / safeZ1
+
+                val p0 = Offset(cx + transformedVerts[0].x * scale0, cy + transformedVerts[0].y * scale0)
+                val p1 = Offset(cx + transformedVerts[1].x * scale1, cy + transformedVerts[1].y * scale1)
+
+                val avgZ = (safeZ0 + safeZ1) / 2f
+                projectedList.add(
+                    ProjectedPolygon(
+                        points = listOf(p0, p1),
+                        depthZ = avgZ,
+                        color = poly.color,
+                        strokeColor = poly.strokeColor ?: poly.color,
+                        strokeWidth = if (poly.strokeWidth > 0f) poly.strokeWidth else 1.2f,
+                        renderLayer = poly.renderLayer
+                    )
+                )
+                continue
+            }
+
             if (transformedVerts.size < 3) continue
+
+            // Normal hesabı ve Lambertian gölgelendirme (3+ noktalı yüzeyler için)
             val v0 = transformedVerts[0]
             val v1 = transformedVerts[1]
             val v2 = transformedVerts[2]
@@ -144,9 +173,11 @@ class Camera3D(
                 continue
             }
 
-            // Işık şiddeti (Ambient: 0.42, Diffuse: 0.58)
+            // Işık şiddeti (Ambient: Zemin katmanları için 0.72f, katı robot için 0.42f)
             val effectiveDot = if (poly.isDoubleSided) kotlin.math.abs(normal dot lightDirection) else max(0f, normal dot lightDirection)
-            val shade = 0.42f + 0.58f * effectiveDot
+            val ambient = if (poly.renderLayer <= 0) 0.72f else 0.42f
+            val diffuse = 1f - ambient
+            val shade = ambient + diffuse * effectiveDot
             val shadedColor = Color(
                 red = (poly.color.red * shade).coerceIn(0f, 1f),
                 green = (poly.color.green * shade).coerceIn(0f, 1f),

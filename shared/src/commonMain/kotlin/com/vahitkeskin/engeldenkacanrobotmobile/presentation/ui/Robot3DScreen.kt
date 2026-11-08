@@ -54,10 +54,8 @@ fun Robot3DScreen(
     is3dActive: Boolean = false,
     onToggle3dActive: () -> Unit = {},
     onNavigateToTelemetry: () -> Unit = {},
-    themeMode: ThemeMode,
-    languageMode: LanguageMode,
-    onThemeSelected: (ThemeMode) -> Unit,
-    onLanguageSelected: (LanguageMode) -> Unit
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    languageMode: LanguageMode = LanguageMode.SYSTEM
 ) {
     val systemInDark = isSystemInDarkTheme()
     val isDark = when (themeMode) {
@@ -306,11 +304,7 @@ fun Robot3DScreen(
                 isTourPlaying = isTourPlaying,
                 onPlayTour = { playTour() },
                 onStopTour = { stopTour() },
-                themeMode = themeMode,
-                languageMode = languageMode,
-                colors = colors,
-                onThemeSelected = onThemeSelected,
-                onLanguageSelected = onLanguageSelected
+                colors = colors
             )
         }
 
@@ -381,11 +375,7 @@ private fun FloatingCameraBar(
     isTourPlaying: Boolean,
     onPlayTour: () -> Unit,
     onStopTour: () -> Unit,
-    themeMode: ThemeMode,
-    languageMode: LanguageMode,
-    colors: AppColors,
-    onThemeSelected: (ThemeMode) -> Unit,
-    onLanguageSelected: (LanguageMode) -> Unit
+    colors: AppColors
 ) {
     Box(
         modifier = Modifier
@@ -479,56 +469,6 @@ private fun FloatingCameraBar(
                             color = if (isTourPlaying) Color(0xFFF59E0B) else Color(0xFF60A5FA),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                // TEMA VE DİL MİNİ BUTONLARI
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(colors.bgPrimary)
-                            .border(0.8.dp, colors.border, RoundedCornerShape(8.dp))
-                            .clickable {
-                                val next = when (themeMode) {
-                                    ThemeMode.SYSTEM -> ThemeMode.DARK
-                                    ThemeMode.DARK -> ThemeMode.LIGHT
-                                    ThemeMode.LIGHT -> ThemeMode.SYSTEM
-                                }
-                                onThemeSelected(next)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (themeMode == ThemeMode.DARK) "🌙" else if (themeMode == ThemeMode.LIGHT) "☀️" else "💻",
-                            fontSize = 13.sp
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(colors.bgPrimary)
-                            .border(0.8.dp, colors.border, RoundedCornerShape(8.dp))
-                            .clickable {
-                                val next = when (languageMode) {
-                                    LanguageMode.SYSTEM -> LanguageMode.TR
-                                    LanguageMode.TR -> LanguageMode.EN
-                                    LanguageMode.EN -> LanguageMode.SYSTEM
-                                }
-                                onLanguageSelected(next)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (languageMode == LanguageMode.TR) "🇹🇷" else if (languageMode == LanguageMode.EN) "🇬🇧" else "🌐",
-                            fontSize = 13.sp
                         )
                     }
                 }
@@ -685,9 +625,7 @@ private fun Robot3DScreenPreview() {
         repository = remember { MockTelemetryRepository() },
         is3dActive = true,
         themeMode = ThemeMode.DARK,
-        languageMode = LanguageMode.TR,
-        onThemeSelected = {},
-        onLanguageSelected = {}
+        languageMode = LanguageMode.TR
     )
 }
 
